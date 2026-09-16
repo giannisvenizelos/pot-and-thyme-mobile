@@ -1,0 +1,7 @@
+{
+  "name": "pot-and-thyme-test-mobile",
+  "private": true,
+  "scripts": {
+    "build": "node ../../scripts/build.mjs mobile"
+  }
+}
