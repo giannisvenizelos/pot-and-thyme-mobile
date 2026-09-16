@@ -54,10 +54,7 @@
     const meals = recipeCategories();
     return '<nav class="m-categories" aria-label="Κατηγορίες συνταγών"><button type="button" class="m-category active" data-m-meal="" aria-label="Όλες οι κατηγορίες">' + icon('grid') + '<span>Όλα</span></button>' + meals.map(meal => '<button type="button" class="m-category" data-m-meal="' + E(meal) + '">' + icon(categoryIcon(meal)) + '<span>' + E(meal) + '</span></button>').join('') + '</nav>';
   }
-  categoryControlsHTML = function () {
-    const html = originalCategoryControls();
-    return html.replace('<select id="meal-filter">', '<select id="meal-filter"><option value=""' + (!S.tab ? ' selected' : '') + '>Όλες οι κατηγορίες</option>');
-  };
+  categoryControlsHTML = function () { return originalCategoryControls(); };
   function quickActions() {
     return '<section class="m-section"><h2>Γρήγορες ενέργειες</h2><div class="m-quick-grid">' +
       routeButton('fridge', 'Τι μαγειρεύω;', 'play', 'm-quick m-orange') +
