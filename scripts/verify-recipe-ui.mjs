@@ -59,7 +59,8 @@ try {
   assert.equal(a.w.document.querySelector('#ct').value,'Συνταγή δοκιμής');assert.equal(a.w.S.creating,true);
   a.click('[data-submit]');await settle();
   const saves=a.calls.filter(call=>call.path?.endsWith('/save_recipe'));
-  assert.equal(saves.length,2);assert.equal(saves[1].data.p_recipe_id,10,'Retry reuses the created recipe');
+  assert.equal(saves.length,1,'Photo retry must not rewrite the already saved recipe');
+  assert(a.calls.filter(call=>call.url?.includes('/object/recipe-photos/')).every(call=>call.url.includes('/10/')),'Retry reuses the created recipe');
   const upload=a.calls.find(call=>call.url?.includes('/object/recipe-photos/'));
   assert(upload.url.includes('/'+a.uid+'/10/'));assert.equal(upload.options.headers['Content-Type'],'image/jpeg');
   assert.equal(upload.options.headers['x-upsert'],'false');assert.equal(a.w.S.creating,false);
@@ -72,7 +73,7 @@ try {
 const b=await setup(true);
 try {
   b.w.S.sel={id:2,title:'Αρχική',meal:'Μεσημεριανά',recipe_origin:'curated',photo_url:'https://example.supabase.co/storage/v1/object/authenticated/recipe-photos/'+b.uid+'/2/old.jpg',recipe_ingredients:[{qty_min:1,qty_max:3,item:'Υλικό',unit:'κιλά',category:'Κατηγορία',option_code:'A',raw:'1–3 κιλά Υλικό'}],recipe_steps:[{instruction:'Βήμα'}]};
-  b.w.render();await settle();b.click('[data-recipe-edit]');b.click('[data-photo-remove]');b.click('[data-recipe-save]');await settle();
+  b.w.render();await settle();b.click('[data-recipe-edit]');b.input('#ct','Ενημερωμένη');b.click('[data-photo-remove]');b.click('[data-recipe-save]');await settle();
   assert(b.calls.some(call=>call.path?.endsWith('/set_recipe_photo')&&call.data.p_path===null));
   assert(b.calls.some(call=>call.options?.method==='DELETE'&&call.options.body.includes('old.jpg')));
   const item=b.calls.find(call=>call.path?.endsWith('/save_recipe')).data.p_data.ingredients[0];assert.equal(item.option_code,'A');assert.equal(item.category,'Κατηγορία');assert.equal(item.qty_max,3);assert.equal(item.unit,'κιλά');assert.equal(item.raw,'1–3 κιλά Υλικό');

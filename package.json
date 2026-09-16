@@ -13,7 +13,7 @@
     "build:all": "node scripts/build.mjs web && node scripts/build.mjs mobile",
     "dev": "npm run build:web && npx serve apps/web/public -l 3000",
     "dev:mobile": "npm run build:mobile && npx serve apps/mobile/public -l 3001",
-    "test:ui": "node scripts/verify-recipe-ui.mjs"
+    "test:ui": "node scripts/verify-recipe-ui.mjs && node scripts/verify-editor-integration.mjs mobile"
   },
   "devDependencies": {
     "jsdom": "26.1.0"

@@ -79,3 +79,11 @@ To make the project fully reproducible, export the missing backend sources from 
 Added shared `recipe-management.js` / `.css`, a private `recipe-photos` Storage bucket, owner-bound management RPCs (`save_recipe`, `set_recipe_photo`, `delete_recipe`, `restore_recipe`, `can_manage_recipe`, `recipe_management_access`) and recoverable deletion via `recipes.deleted_at`. The owner mapping lives in `private.recipe_management_owner`, inaccessible to client roles. Community authors can edit their own content; curated management is restricted to the mapped owner.
 
 Supabase migrations applied: `recipe_management_and_private_photos`, `preserve_recipe_ingredient_variants_in_editor`, and validation/source-preservation updates. Source and rolled-back permission verification are in `scripts/`.
+
+## Photo-only save regression (2026-09-16)
+
+The imported breakfast recipes have instruction text in `source_text`, but 90 have no rows in `recipe_steps`. The editor previously sent every photo edit through `save_recipe`, which requires at least one structured step. Consequently that RPC rejected the save before any image upload. Its error was displayed only above the ingredients, far from the save button.
+
+Photo-only edits now use the existing authenticated Storage and `set_recipe_photo` flow without rewriting or validating unrelated recipe fields. An editable-field signature distinguishes real edits from number-input serialization changes. Full recipe edits retain validation; errors and upload progress also appear beside Save, and upload retries retain the image without repeating a successful metadata write. Edit-modal row/category controls are explicitly bound after the modal is inserted.
+
+`npm run test:ui` includes integration regressions using each available edition's real renderers and event handlers, with HTTP and canvas boundaries mocked. Cases cover missing imported steps, photo-only preservation, metadata plus photo, upload/link retries and visible validation. These are not authenticated production upload tests. No database records, functions, RLS policies or bucket permissions were changed for this fix.

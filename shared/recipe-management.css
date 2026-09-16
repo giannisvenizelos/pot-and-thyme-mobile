@@ -5,6 +5,9 @@
 .recipe-photo-preview,.recipe-camera video{display:block;width:100%;max-width:600px;max-height:360px;object-fit:contain;border-radius:14px;margin:12px 0;background:#151815}
 .recipe-photo-preview[hidden],.recipe-camera[hidden],.recipe-photo-actions [hidden]{display:none}
 .recipe-editor-status{min-height:1.5em;line-height:1.5;margin:12px 0}
+.recipe-save-actions{margin-top:20px;padding-top:12px;border-top:1px solid var(--admin-line,#343933)}
+.recipe-save-status{font-weight:600;overflow-wrap:anywhere}
+.recipe-save-actions .submit-recipe{width:100%}
 .recipe-manage-root .overlay{z-index:150}
 .recipe-create-modal .fields textarea{width:100%;min-height:90px}
 .recipe-own-list{margin-top:24px}

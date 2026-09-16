@@ -27,11 +27,29 @@
   }
   function message(text) {
     if (draft) draft.message = text;
-    const status = document.querySelector('.recipe-editor-status');
-    if (status) status.textContent = text;
+    const statuses = document.querySelectorAll('.recipe-editor-status');
+    if (statuses.length) statuses.forEach(status => { status.textContent = text; });
     else { S.status = text; render(); }
   }
   function editorRoot() { return document.querySelector('.recipe-manage-modal') || document.querySelector('.recipe-create-modal'); }
+  // Compare only editable fields. Number inputs serialize null as '' and numbers as
+  // strings; those representation changes must not turn a photo edit into a recipe rewrite.
+  function editableSignature(value) {
+    const number = input => input == null || String(input).trim() === '' ? null : Number(input);
+    return JSON.stringify({
+      title:value.title,meal:value.meal,subcategory:value.subcategory,description:value.description,
+      servings:number(value.servings),prep_minutes:number(value.prep_minutes),cook_minutes:number(value.cook_minutes),
+      ingredients:value.ingredients.map(item => ({qty:number(item.qty_min),unit:item.unit,item:item.item})),
+      steps:value.steps.map(step => step.instruction)
+    });
+  }
+  function updateEditorState() {
+    const root=editorRoot();if(!root)return;
+    root.setAttribute('aria-busy',String(saving));
+    root.querySelectorAll('input,textarea,select,button').forEach(field=>field.disabled=saving);
+    const submit=root.querySelector('[data-submit],[data-recipe-save]');
+    if(submit){submit.disabled=saving||preparing;if(saving)submit.textContent='Αποθήκευση…';}
+  }
   function captureDraft() {
     const root = editorRoot(); if (!root || !draft) return;
     for (const [key, id] of Object.entries({title:'ct',meal:'cm',subcategory:'cs',prep_minutes:'cprep',cook_minutes:'ccook',description:'cdescription',servings:'cservings'})) {
@@ -49,10 +67,12 @@
     draft.steps = [...root.querySelectorAll('.step-row')].map(row => ({instruction:row.querySelector('[data-step-text]').value}));
   }
   function freshDraft(row) {
-    return {id:row?.id || null,title:row?.title || '',meal:row?.meal || S.tab || 'Μεσημεριανά',subcategory:row?.subcategory || '',
+    const value={id:row?.id || null,title:row?.title || '',meal:row?.meal || S.tab || 'Μεσημεριανά',subcategory:row?.subcategory || '',
       description:row?.description || '',servings:row?.servings || 1,prep_minutes:row?.prep_minutes ?? '',cook_minutes:row?.cook_minutes ?? '',
       photo_url:row?.photo_url || '',ingredients:row?.recipe_ingredients?.map(item => ({...item,key:crypto.randomUUID(),qty_min:item.qty_min ?? '',unit:item.unit || '',item:item.item || ''})) || [{qty_min:'',unit:'',item:''}],
       steps:row?.recipe_steps?.map(step => ({instruction:step.instruction || ''})) || [{instruction:''}]};
+    value.savedFields=row?.id?editableSignature(value):null;
+    return value;
   }
   function photoControls() {
     return `<section class="form-section recipe-photo-controls"><h3>Φωτογραφία συνταγής</h3>
@@ -81,7 +101,8 @@
   createModal = function () {
     if (!draft) draft = freshDraft();
     return baseCreate().replace('<section class="form-section"><h3>Υλικά</h3>', extraFields() + photoControls() + '<section class="form-section"><h3>Υλικά</h3>')
-      .replace('Υποβολή για έγκριση</button>', (S.recipeManager ? 'Δημοσίευση συνταγής' : 'Υποβολή για έγκριση') + '</button>');
+      .replace('Υποβολή για έγκριση</button>', (S.recipeManager ? 'Δημοσίευση συνταγής' : 'Υποβολή για έγκριση') + '</button>')
+      .replace(/(<button class="btn submit-recipe"[^>]*>[\s\S]*?<\/button>)/,'<div class="recipe-save-actions"><p class="recipe-editor-status recipe-save-status" role="status" aria-live="polite"></p>$1</div>');
   };
   recipeModal = function () {
     const html = baseDetail(); if (!S.sel || S.sel.__loading || !mayManage(S.sel)) return html;
@@ -96,7 +117,9 @@
   function restoreDraft() {
     const root = editorRoot(); if (!root || !draft) return;
     for (const [key,id] of Object.entries({title:'ct',meal:'cm',prep_minutes:'cprep',cook_minutes:'ccook',description:'cdescription',servings:'cservings'})) {
-      const field=root.querySelector('#'+id); if(field) field.value=draft[key] ?? '';
+      const field=root.querySelector('#'+id);
+      if(key==='meal'&&field&&draft.meal&&![...field.options].some(option=>option.value===draft.meal))field.add(new Option(draft.meal,draft.meal));
+      if(field)field.value=draft[key] ?? '';
     }
     const sub=root.querySelector('#cs');
     if(sub) { const values=recipeSubcategories(draft.meal); if(draft.subcategory&&!values.includes(draft.subcategory))values.push(draft.subcategory);
@@ -106,10 +129,15 @@
     root.querySelector('#stepRows').innerHTML=draft.steps.map((_,i)=>stepRowHTML(i+1)).join('');
     root.querySelectorAll('[data-step-text]').forEach((field,i)=>field.value=draft.steps[i].instruction);
     bindRows(); updatePreview();
+    // The edit modal is appended after the base renderer binds the create form.
+    if(root.matches('.recipe-manage-modal')) {
+      root.querySelector('[data-add-ing]').onclick=addIng;
+      root.querySelector('[data-add-step]').onclick=addStep;
+      root.querySelector('#cm').onchange=refreshCreateSubcats;
+    }
     if(stream) { const panel=root.querySelector('.recipe-camera');panel.hidden=false;panel.querySelector('video').srcObject=stream; }
-    root.querySelectorAll('input,textarea,select,button').forEach(field=>field.disabled=saving);
-    root.querySelector('[data-submit],[data-recipe-save]').disabled=saving||preparing;
-    root.querySelector('.recipe-editor-status').textContent=draft.message || '';
+    updateEditorState();
+    root.querySelectorAll('.recipe-editor-status').forEach(status=>status.textContent=draft.message || '');
   }
   function updatePreview() {
     const root=editorRoot(); if(!root) return;
@@ -198,7 +226,9 @@
     const previous=photoPath(draft.photo_url);
     if(photo) {
       const path=S.session.user.id+'/'+id+'/'+crypto.randomUUID()+'.jpg';
+      message('Ανέβασμα φωτογραφίας…');
       await storageRequest('object/'+bucket+'/'+path,{method:'POST',headers:{'Content-Type':'image/jpeg','x-upsert':'false','cache-control':'max-age=3600'},body:photo});
+      message('Σύνδεση φωτογραφίας με τη συνταγή…');
       try { draft.photo_url=await api('/rest/v1/rpc/set_recipe_photo',{method:'POST',body:JSON.stringify({p_recipe_id:id,p_path:path})}); }
       catch(error){try{await removeStoredPhoto(path);}catch{}throw error;}
       if(previous)try{await removeStoredPhoto(previous);}catch{S.status='Η φωτογραφία αποθηκεύτηκε. Η παλιά φωτογραφία δεν αφαιρέθηκε από τον χώρο αποθήκευσης.';}
@@ -213,18 +243,35 @@
     await Promise.allSettled([fetchCatalog(true),loadHomePool(),loadRecentCommunity(),loadTaxonomy(),loadModeration(),loadOwnRecipes()]);
   }
   async function saveRecipe() {
-    if(saving||!draft)return;if(preparing)return message('Περίμενε να ετοιμαστεί η φωτογραφία.');captureDraft();stopCamera();
-    if(!draft.title.trim()||draft.ingredients.some(item=>!item.item.trim()||(!String(item.qty_min).trim()&&!String(item.raw||'').trim()))||draft.steps.some(step=>!step.instruction.trim()))return message('Συμπλήρωσε τίτλο, όνομα ή περιγραφή για κάθε υλικό και όλα τα βήματα.');
-    const selectedAtStart=selection; // Do not submit while image conversion is still in progress.
-    const fields={title:draft.title,meal:typeof canonicalMeal==='function'?canonicalMeal(draft.meal):draft.meal,subcategory:draft.subcategory,description:draft.description,servings:draft.servings,prep_minutes:draft.prep_minutes,cook_minutes:draft.cook_minutes,ingredients:draft.ingredients,steps:draft.steps};
-    saving=true;S.busy=true;render();message('Αποθήκευση συνταγής…');
-    try { const id=await api('/rest/v1/rpc/save_recipe',{method:'POST',body:JSON.stringify({p_recipe_id:draft.id,p_data:fields})});
-      if(!Number.isInteger(id))throw new Error('Δεν επιστράφηκε ο κωδικός της συνταγής.');draft.id=id;
+    if(saving||!draft)return;if(preparing)return message('Περίμενε να ετοιμαστεί η φωτογραφία.');
+    let completed=false;
+    try {
+      captureDraft();stopCamera();
+      const signature=editableSignature(draft),fieldsChanged=!draft.id||signature!==draft.savedFields;
+      if(fieldsChanged) {
+        if(!draft.title.trim())return message('Συμπλήρωσε τον τίτλο της συνταγής.');
+        if(!draft.ingredients.length||draft.ingredients.some(item=>!item.item.trim()||(!String(item.qty_min).trim()&&!String(item.raw||'').trim())))return message('Συμπλήρωσε όνομα και ποσότητα ή περιγραφή για κάθε υλικό.');
+        if(!draft.steps.length||draft.steps.some(step=>!step.instruction.trim()))return message('Για αλλαγή στα στοιχεία της συνταγής χρειάζεται τουλάχιστον ένα συμπληρωμένο βήμα. Για αλλαγή μόνο φωτογραφίας, κράτησε τα υπόλοιπα πεδία όπως ήταν.');
+      } else if(!photo&&!photoRemoved)return message('Δεν υπάρχουν αλλαγές για αποθήκευση.');
+      const selectedAtStart=selection;
+      saving=true;S.busy=true;updateEditorState();
+      if(fieldsChanged) {
+        message('Αποθήκευση συνταγής…');
+        const fields={title:draft.title,meal:draft.meal,subcategory:draft.subcategory,description:draft.description,servings:draft.servings,prep_minutes:draft.prep_minutes,cook_minutes:draft.cook_minutes,ingredients:draft.ingredients,steps:draft.steps};
+        const id=await api('/rest/v1/rpc/save_recipe',{method:'POST',body:JSON.stringify({p_recipe_id:draft.id,p_data:fields})});
+        if(!Number.isInteger(id))throw new Error('Δεν επιστράφηκε ο κωδικός της συνταγής.');
+        draft.id=id;draft.savedFields=signature;
+      }
       if(selectedAtStart!==selection)throw new Error('Η φωτογραφία άλλαξε. Αποθήκευσε ξανά.');
-      await persistPhoto(id);S.creating=false;S.recipeEdit=null;S.sel=null;resetDraft();
-      S.status=S.recipeManager?'Η συνταγή αποθηκεύτηκε.':'Η συνταγή υποβλήθηκε για έγκριση.';await refreshRecipes(); }
-    catch(error){message(error.message+' Τα πεδία σου διατηρήθηκαν· μπορείς να δοκιμάσεις ξανά.');S.status=error.message;}
-    finally{saving=false;S.busy=false;render();if(draft)message(S.status);}
+      await persistPhoto(draft.id);S.creating=false;S.recipeEdit=null;S.sel=null;resetDraft();completed=true;
+      S.status=S.recipeManager?'Οι αλλαγές αποθηκεύτηκαν.':'Οι αλλαγές υποβλήθηκαν για έγκριση.';
+    } catch(error){S.status=(error?.message||'Η αποθήκευση απέτυχε.')+' Τα πεδία και η φωτογραφία σου διατηρήθηκαν· μπορείς να δοκιμάσεις ξανά.';message(S.status);}
+    finally {
+      const attempted=saving;saving=false;S.busy=false;
+      if(attempted)render();
+    }
+    // Refresh is separate from persistence: a slow catalogue must not lock Save.
+    if(completed)refreshRecipes().then(()=>render()).catch(()=>{S.status='Οι αλλαγές αποθηκεύτηκαν. Ανανέωσε τη σελίδα για να ενημερωθεί ο κατάλογος.';render();});
   }
   submitRecipe=saveRecipe;
   async function editRecipe() {
