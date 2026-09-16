@@ -43,7 +43,7 @@
       const qty = row.querySelector('[data-ing-qty]').value;
       const max = previous.qty_max != null && +previous.qty_max !== +previous.qty_min ? Math.max(+qty, +previous.qty_max) : qty;
       const unit=row.querySelector('[data-ing-unit]').value,item=row.querySelector('[data-ing-item]').value;
-      const raw=String(qty)===String(previous.qty_min)&&unit===previous.unit&&item===previous.item?previous.raw:null;
+      const sameQty=(String(qty).trim()===''&&(previous.qty_min==null||String(previous.qty_min).trim()===''))||String(qty)===String(previous.qty_min);const raw=sameQty&&unit===previous.unit&&item===previous.item?previous.raw:null;
       return {...previous,raw,key:row.dataset.ingredientKey || crypto.randomUUID(),qty_min:qty,qty_max:max,unit,item};
     });
     draft.steps = [...root.querySelectorAll('.step-row')].map(row => ({instruction:row.querySelector('[data-step-text]').value}));

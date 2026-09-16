@@ -92,7 +92,7 @@ declare v_id integer; v_owner boolean; v_ingredients jsonb; v_steps jsonb; v_ite
 begin
   if (select auth.uid()) is null then raise exception 'Χρειάζεται σύνδεση.'; end if;
   v_owner:=public.recipe_management_access();
-  v_title:=nullif(btrim(p_data->>'title'),''); v_meal:=p_data->>'meal';
+  v_title:=nullif(btrim(p_data->>'title'),''); v_meal:=case p_data->>'meal' when 'Πρωινό' then 'Πρωινά' when 'Μεσημεριανό' then 'Μεσημεριανά' when 'Βραδινό' then 'Βραδινά' else p_data->>'meal' end;
   v_servings:=coalesce(nullif(p_data->>'servings','')::numeric,1);
   v_prep:=nullif(p_data->>'prep_minutes','')::integer; v_cook:=nullif(p_data->>'cook_minutes','')::integer;
   v_ingredients:=p_data->'ingredients'; v_steps:=p_data->'steps';
@@ -125,12 +125,16 @@ begin
   end if;
   for v_item in select value from jsonb_array_elements(v_ingredients) loop
     v_pos:=v_pos+1;
-    if nullif(btrim(v_item->>'item'),'') is null or nullif(v_item->>'qty_min','')::numeric is null
-      or (v_item->>'qty_min')::numeric<0 or (v_item->>'qty_min')::numeric::text in ('NaN','Infinity','-Infinity') then raise exception 'Συμπλήρωσε ποσότητα και όνομα για κάθε υλικό.'; end if;
-    if nullif(v_item->>'qty_max','') is not null and ((v_item->>'qty_max')::numeric<(v_item->>'qty_min')::numeric or (v_item->>'qty_max')::numeric::text in ('NaN','Infinity','-Infinity')) then raise exception 'Μη έγκυρη μέγιστη ποσότητα.'; end if;
+    if nullif(btrim(v_item->>'item'),'') is null then raise exception 'Συμπλήρωσε όνομα για κάθε υλικό.'; end if;
+    if nullif(v_item->>'qty_min','') is null and nullif(btrim(v_item->>'raw'),'') is null then raise exception 'Συμπλήρωσε ποσότητα ή περιγραφή για κάθε υλικό.'; end if;
+    if nullif(v_item->>'qty_max','') is not null and nullif(v_item->>'qty_min','') is null then raise exception 'Η μέγιστη ποσότητα χρειάζεται και ελάχιστη ποσότητα.'; end if;
+    if nullif(v_item->>'qty_min','') is not null
+      and ((v_item->>'qty_min')::numeric<0 or (v_item->>'qty_min')::numeric::text in ('NaN','Infinity','-Infinity')) then raise exception 'Μη έγκυρη ποσότητα.'; end if;
+    if nullif(v_item->>'qty_max','') is not null
+      and ((v_item->>'qty_max')::numeric<(v_item->>'qty_min')::numeric or (v_item->>'qty_max')::numeric::text in ('NaN','Infinity','-Infinity')) then raise exception 'Μη έγκυρη μέγιστη ποσότητα.'; end if;
     insert into public.recipe_ingredients(recipe_id,position,raw,qty_min,qty_max,unit,item,category,option_code)
-    values(v_id,v_pos,coalesce(nullif(v_item->>'raw',''),btrim(concat_ws(' ',v_item->>'qty_min',v_item->>'unit',v_item->>'item'))),
-      (v_item->>'qty_min')::numeric,coalesce(nullif(v_item->>'qty_max','')::numeric,(v_item->>'qty_min')::numeric),coalesce(v_item->>'unit',''),btrim(v_item->>'item'),nullif(v_item->>'category',''),nullif(v_item->>'option_code',''));
+    values(v_id,v_pos,coalesce(nullif(v_item->>'raw',''),nullif(btrim(concat_ws(' ',nullif(v_item->>'qty_min',''),v_item->>'unit',v_item->>'item')),'')),
+      nullif(v_item->>'qty_min','')::numeric,case when nullif(v_item->>'qty_max','') is not null then (v_item->>'qty_max')::numeric else nullif(v_item->>'qty_min','')::numeric end,coalesce(v_item->>'unit',''),btrim(v_item->>'item'),nullif(v_item->>'category',''),nullif(v_item->>'option_code',''));
   end loop;
   v_pos:=0;
   for v_item in select value from jsonb_array_elements(v_steps) loop
