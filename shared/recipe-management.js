@@ -216,7 +216,7 @@
     if(saving||!draft)return;if(preparing)return message('Περίμενε να ετοιμαστεί η φωτογραφία.');captureDraft();stopCamera();
     if(!draft.title.trim()||draft.ingredients.some(item=>!String(item.qty_min).trim()||!item.item.trim())||draft.steps.some(step=>!step.instruction.trim()))return message('Συμπλήρωσε τίτλο, όλα τα υλικά και όλα τα βήματα.');
     const selectedAtStart=selection; // Do not submit while image conversion is still in progress.
-    const fields={title:draft.title,meal:draft.meal,subcategory:draft.subcategory,description:draft.description,servings:draft.servings,prep_minutes:draft.prep_minutes,cook_minutes:draft.cook_minutes,ingredients:draft.ingredients,steps:draft.steps};
+    const fields={title:draft.title,meal:typeof canonicalMeal==='function'?canonicalMeal(draft.meal):draft.meal,subcategory:draft.subcategory,description:draft.description,servings:draft.servings,prep_minutes:draft.prep_minutes,cook_minutes:draft.cook_minutes,ingredients:draft.ingredients,steps:draft.steps};
     saving=true;S.busy=true;render();message('Αποθήκευση συνταγής…');
     try { const id=await api('/rest/v1/rpc/save_recipe',{method:'POST',body:JSON.stringify({p_recipe_id:draft.id,p_data:fields})});
       if(!Number.isInteger(id))throw new Error('Δεν επιστράφηκε ο κωδικός της συνταγής.');draft.id=id;
