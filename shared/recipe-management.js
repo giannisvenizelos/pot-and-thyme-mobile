@@ -296,7 +296,7 @@
     try{S.ownRecipes=await api('/rest/v1/recipes?select=id,title,moderation_status,recipe_origin&'+(S.recipeManager?'recipe_origin=eq.community':'created_by=eq.'+S.session.user.id)+'&order=created_at.desc&limit=200');}catch{S.ownRecipes=[];}
   }
   function managementPanel() {
-    if(S.view!=='recipes'||!S.session)return;
+    if(S.view!=='recipes'||!S.session||S.recipeManager)return;
     const workspace=document.querySelector('.workspace-inner');if(!workspace)return;
     const rows=S.ownRecipes||[];
     workspace.insertAdjacentHTML('beforeend',`<section class="panel recipe-own-list"><h2>${S.recipeManager?'Διαχείριση υποβολών χρηστών':'Οι συνταγές μου'}</h2>${rows.length?rows.map(row=>`<div class="item"><div><b>${E(row.title)}</b><span class="tag">${E(({pending:'Σε αναμονή',approved:'Δημοσιευμένη',rejected:'Δεν εγκρίθηκε'})[row.moderation_status]||row.moderation_status)}</span></div><button class="btn ghost" type="button" data-own-recipe="${row.id}">Προβολή & επεξεργασία</button></div>`).join(''):'<p class="muted">Δεν έχεις προσθέσει συνταγές ακόμη.</p>'}</section>`);
