@@ -35,7 +35,7 @@
     return '<button type="button" class="' + cls + '" data-m-route="' + route + '">' + icon(symbol) + '<span>' + name + '</span></button>';
   }
   function brand() {
-    return '<span class="m-wordmark">Pot &amp; Thyme</span><img src="/assets/thyme-sprig.png" alt="" width="26" height="36">';
+    return '<span class="m-wordmark">Pot &amp; Thyme</span><img src="/assets/thyme-sprig.svg" alt="" width="26" height="36">';
   }
   function header() {
     return '<header class="m-header"><button type="button" class="m-icon-button" data-m-menu aria-label="Άνοιγμα μενού" aria-controls="mobile-menu" aria-expanded="false">' + icon('menu') + '</button><button type="button" class="m-brand" data-m-route="home" aria-label="Pot & Thyme — Αρχική">' + brand() + '</button><button type="button" class="m-icon-button" data-m-search-focus aria-label="Αναζήτηση συνταγών">' + icon('search') + '</button><button type="button" class="m-icon-button m-account" data-m-route="profile" aria-label="Προφίλ">' + icon('profile') + '</button></header>';
@@ -72,7 +72,7 @@
     const photo = photoURL(row);
     const time = (+row.prep_minutes || 0) + (+row.cook_minutes || 0);
     return '<article class="m-recipe-card"><button type="button" class="m-recipe-open" data-open="' + E(row.id) + '" aria-label="Προβολή: ' + E(row.title) + '"><div class="m-recipe-media' + (photo ? '' : ' m-no-photo') + '">' +
-      (photo ? '<img src="' + E(photo) + '" alt="' + E(row.title) + '" loading="lazy" width="300" height="220">' : '<img src="/assets/thyme-branch.png" alt="" width="60" height="84"><span>' + E(row.subcategory || row.meal || 'Συνταγή') + '</span>') +
+      (photo ? '<img src="' + E(photo) + '" alt="' + E(row.title) + '" loading="lazy" width="300" height="220">' : '<img src="/assets/thyme-branch.svg" alt="" width="60" height="84"><span>' + E(row.subcategory || row.meal || 'Συνταγή') + '</span>') +
       '</div><h3>' + E(row.title) + '</h3></button><div class="m-recipe-meta"><span>' + icon('clock') + (time ? E(time) + '′' : 'Συνταγή') + '</span><button type="button" class="m-card-add" data-add="' + E(row.id) + '" aria-label="Προσθήκη στο πλάνο: ' + E(row.title) + '">' + icon('plus') + '</button></div></article>';
   }
   function recipeSection(title, rows, id) {
@@ -88,7 +88,7 @@
     const keys = new Set(days.map(day => day.key));
     const today = days.find(day => day.today).key;
     const filled = new Set((S.plan || []).map(item => String(item.plan_date || today).slice(0, 10)).filter(key => keys.has(key))).size;
-    return '<section class="m-week-panel" aria-labelledby="mobile-week-title"><div class="m-week-summary">' + icon('calendar') + '<div><h2 id="mobile-week-title">Πλάνο εβδομάδας</h2><p>' + filled + ' / 7 ημέρες με συνταγή</p><progress value="' + filled + '" max="7" aria-label="Ημέρες με επιλεγμένη συνταγή"></progress></div><img src="/assets/thyme-sprig.png" alt="" width="34" height="46"><button type="button" class="m-icon-button" data-m-route="plan" aria-label="Άνοιγμα εβδομαδιαίου πλάνου">' + icon('arrow') + '</button></div>' + planHTML() + '</section>';
+    return '<section class="m-week-panel" aria-labelledby="mobile-week-title"><div class="m-week-summary">' + icon('calendar') + '<div><h2 id="mobile-week-title">Πλάνο εβδομάδας</h2><p>' + filled + ' / 7 ημέρες με συνταγή</p><progress value="' + filled + '" max="7" aria-label="Ημέρες με επιλεγμένη συνταγή"></progress></div><img src="/assets/thyme-sprig.svg" alt="" width="34" height="46"><button type="button" class="m-icon-button" data-m-route="plan" aria-label="Άνοιγμα εβδομαδιαίου πλάνου">' + icon('arrow') + '</button></div>' + planHTML() + '</section>';
   }
   homeViewHTML = function () {
     const pool = homePoolRows();
@@ -110,7 +110,7 @@
   function drawer() {
     const admin = S.isAdmin ? routeButton('moderation', 'Έγκριση συνταγών', 'check', 'm-menu-link') : '';
     return '<div class="m-drawer-root"><div class="m-drawer-shade" data-m-dismiss></div><section class="m-drawer" id="mobile-menu" role="dialog" aria-modal="true" aria-label="Μενού εφαρμογής"><div class="m-drawer-head"><div class="m-brand">' + brand() + '</div><button type="button" class="m-icon-button" data-m-dismiss aria-label="Κλείσιμο μενού">' + icon('close') + '</button></div><nav aria-label="Όλες οι ενότητες">' +
-      routeButton('home','Αρχική','home','m-menu-link') + routeButton('discover','Ανακάλυψε','search','m-menu-link') + routeButton('recipes','Οι συνταγές','recipes','m-menu-link') + routeButton('plan','Πλάνο εβδομάδας','calendar','m-menu-link') + routeButton('shop','Λίστα αγορών','cart','m-menu-link') + routeButton('fridge','Τι έχω στο ψυγείο;','play','m-menu-link') + routeButton('new','Νέα συνταγή','plus','m-menu-link') + admin + '<div class="m-menu-divider"></div>' + routeButton('profile','Λογαριασμός & Ρυθμίσεις','settings','m-menu-link') + routeButton('logout','Αποσύνδεση','logout','m-menu-link') + '</nav><div class="m-drawer-footer"><img src="/assets/thyme-branch.png" alt="" width="50" height="70"><span>Καλό φαγητό<br>καλύτερο αύριο</span></div></section></div>';
+      routeButton('home','Αρχική','home','m-menu-link') + routeButton('discover','Ανακάλυψε','search','m-menu-link') + routeButton('recipes','Οι συνταγές','recipes','m-menu-link') + routeButton('plan','Πλάνο εβδομάδας','calendar','m-menu-link') + routeButton('shop','Λίστα αγορών','cart','m-menu-link') + routeButton('fridge','Τι έχω στο ψυγείο;','play','m-menu-link') + routeButton('new','Νέα συνταγή','plus','m-menu-link') + admin + '<div class="m-menu-divider"></div>' + routeButton('profile','Λογαριασμός & Ρυθμίσεις','settings','m-menu-link') + routeButton('logout','Αποσύνδεση','logout','m-menu-link') + '</nav><div class="m-drawer-footer"><img src="/assets/thyme-branch.svg" alt="" width="50" height="70"><span>Καλό φαγητό<br>καλύτερο αύριο</span></div></section></div>';
   }
   function setMenu(open) {
     menuOpen = open;

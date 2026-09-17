@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 120" role="img" aria-label="Θυμάρι">
+  <path d="M38 113C39 91 42 70 46 49c3-15 7-28 12-40" fill="none" stroke="#c7d295" stroke-width="4" stroke-linecap="round"/>
+  <path d="M43 78C28 73 17 64 10 52c14-1 27 7 34 19M45 68c14-5 23-13 29-24-13 0-24 7-30 17M48 53C35 47 27 39 22 29c12 0 23 6 28 16M51 42c10-4 17-10 21-19-10 0-18 5-23 13M40 91c-12-2-22-8-29-17 12-1 23 4 30 13" fill="none" stroke="#b5c474" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M12 52c4 5 9 9 16 12M29 32c4 4 9 7 14 9M61 29c-3 4-7 7-12 10M69 51c-4 4-8 7-13 9M13 75c5 4 10 6 16 7" fill="none" stroke="#fa922e" stroke-width="2.2" stroke-linecap="round" opacity=".9"/>
+</svg>
