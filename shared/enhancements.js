@@ -40,7 +40,7 @@
         el.appendChild(document.createElement('br'));
         var b=document.createElement('button');
         b.className='btn ghost';b.type='button';b.textContent='Δες συνταγές';
-        b.addEventListener('click',function(){S.view='recipes';render();});
+        b.addEventListener('click',function(){navigateView('recipes','discover');});
         el.appendChild(b);
       }
     }
