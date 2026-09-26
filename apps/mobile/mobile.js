@@ -73,7 +73,7 @@
     const time = (+row.prep_minutes || 0) + (+row.cook_minutes || 0);
     return '<article class="m-recipe-card"><button type="button" class="m-recipe-open" data-open="' + E(row.id) + '" aria-label="Προβολή: ' + E(row.title) + '"><div class="m-recipe-media' + (photo ? '' : ' m-no-photo') + '">' +
       (photo ? '<img src="' + E(photo) + '" alt="' + E(row.title) + '" loading="lazy" width="300" height="220">' : '<img src="/assets/thyme-branch.svg" alt="" width="60" height="84"><span>' + E(row.subcategory || row.meal || 'Συνταγή') + '</span>') +
-      '</div><h3>' + E(row.title) + '</h3></button><div class="m-recipe-meta"><span>' + icon('clock') + (time ? E(time) + '′' : 'Συνταγή') + '</span><button type="button" class="m-card-add" data-add="' + E(row.id) + '" aria-label="Προσθήκη στο πλάνο: ' + E(row.title) + '">' + icon('plus') + '</button></div></article>';
+      '</div><h3>' + E(row.title) + '</h3><span class="recipe-author">Από ' + E(recipeAuthor(row)) + '</span></button><div class="m-recipe-meta"><span>' + icon('clock') + (time ? E(time) + '′' : 'Συνταγή') + '</span><button type="button" class="m-card-add" data-add="' + E(row.id) + '" aria-label="Προσθήκη στο πλάνο: ' + E(row.title) + '">' + icon('plus') + '</button></div></article>';
   }
   function recipeSection(title, rows, id) {
     if (!rows.length) return '';
