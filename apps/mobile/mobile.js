@@ -143,14 +143,11 @@
     if (route === 'profile') { S.privacyOpen = true; render(); $('.privacy-modal .close')?.focus(); return; }
     if (route === 'logout') { disconnectRealtime(); saveSession(null); S.house = null; S.recipes = []; S.privacyOpen = false; S.__bootResolved = true; render(); return; }
     if (route === 'new') {
-      S.view = 'recipes'; S.sideNav = 'recipes';
+      navigateView('recipes','recipes');
       S.creating = true; render(); refreshCreateSubcats(); $('#ct')?.focus(); return;
     }
     S.privacyOpen = false;
-    S.view = route === 'discover' || route === 'moderation' ? 'recipes' : route;
-    S.sideNav = route === 'discover' ? 'discover' : S.view;
-    if (route === 'home') { S.search = ''; S.cat = ''; S.homeRecipes = null; }
-    render();
+    navigateView(route === 'discover' || route === 'moderation' ? 'recipes' : route, route);
     window.scrollTo({ top: 0, behavior: 'instant' });
     if (route === 'discover') $('#mobile-search')?.focus();
     if (route === 'moderation') document.querySelector('.moderation')?.scrollIntoView({ block: 'start' });
@@ -165,7 +162,7 @@
     if (!input) return;
     S.search = input.value;
     searchFocus = { start: input.selectionStart, end: input.selectionEnd };
-    S.view = 'recipes'; S.sideNav = 'discover';
+    navigateView('recipes','discover');
     // Search all categories from Home; preserve explicit filters within the catalogue.
     if (document.querySelector('.m-home')) { S.tab = ''; S.cat = ''; }
     S.cursor = 0;
