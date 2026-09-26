@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const edition = process.argv[2] || 'web';
+const edition = process.argv[2] || 'mobile';
 if (!['web', 'mobile'].includes(edition)) throw new Error('Expected web or mobile');
 const app = join(root, 'apps', edition);
 const output = join(app, 'public');

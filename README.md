@@ -1,36 +1,35 @@
-# PoT & Thyme TEST
+# PoT & Thyme Mobile
 
-Two independently deployable browser applications with shared data modules.
+The dedicated, independently deployable mobile browser application for PoT & Thyme.
 
-| Edition | Vercel project | Root Directory | Build command | Output directory |
-| --- | --- | --- | --- | --- |
-| Web | pot-and-thyme-web | repository root | npm run build:web | apps/web/public |
-| Mobile | pot-and-thyme-mobile | apps/mobile | npm run build | public |
+| Vercel project | Root Directory | Build command | Output directory |
+| --- | --- | --- | --- |
+| pot-and-thyme-mobile | repository root | npm run build | apps/mobile/public |
 
-The existing web URL remains `https://pot-and-thyme-web.vercel.app/`. The dedicated mobile URL is `https://pot-and-thyme-mobile.vercel.app/`.
+The application is deployed at `https://pot-and-thyme-mobile.vercel.app/`.
 
 ## Source layout
 
-- `apps/web/`: web entry point, stylesheet and renderer; does not load mobile modules.
 - `apps/mobile/`: mobile entry point, stylesheets and renderer. The mobile presentation remains active at every viewport width, including phone rotation.
 - `shared/`: data/authentication modules, feature helpers, legal pages and image assets.
-- `scripts/build.mjs`: dependency-free build, copies shared and edition assets and generates a separate versioned offline shell for each edition.
+- `scripts/build.mjs`: dependency-free build, copies shared and mobile assets and generates a versioned offline shell.
 
-Both apps use the existing Supabase project and accounts. Browser login sessions, offline caches and themes are stored separately on each origin; users sign in separately on each URL. There is no automatic device redirect.
+The mobile app uses the existing Supabase project and accounts. Browser login sessions, offline caches and themes are stored on the mobile origin. There is no automatic device redirect.
 
 ## Local use
 
 ```bash
-npm run build:all
-npm run dev          # web, port 3000
-npm run dev:mobile   # mobile, port 3001
+npm ci
+npm run build
+npm run dev          # mobile, port 3000
+npm run test:ui
 ```
 
 Build output is generated and ignored by Git. Edit source files rather than `public/`.
 
 ## Git deployments
 
-Connect both Vercel projects to this repository and use the settings above. For a mobile project rooted at `apps/mobile`, enable access to source files outside the Root Directory so the build can read `shared/` and `scripts/`. Alternatively keep its Root Directory at the repository root, set Build Command to `npm run build:mobile`, and Output Directory to `apps/mobile/public`.
+Connect the mobile Vercel project to this repository and use the settings above. Keeping the Root Directory at the repository root lets the build read `shared/` and `scripts/` directly.
 
 ## Existing backend limitation
 
@@ -38,7 +37,7 @@ This repository was recovered from public frontend assets on 2026-08-29. Serverl
 
 ## Recipe management and photos
 
-Both editions support photo upload and native phone camera capture. Desktop browsers can open a live camera preview. Images are resized to at most 1600 pixels, converted to JPEG and uploaded to the private Supabase `recipe-photos` bucket (5 MB limit). Stable authenticated Storage URLs are stored in `recipes.photo_url`; the UI obtains temporary signed URLs for display.
+The mobile edition supports photo upload and native phone camera capture. Desktop browsers can open a live camera preview. Images are resized to at most 1600 pixels, converted to JPEG and uploaded to the private Supabase `recipe-photos` bucket (5 MB limit). Stable authenticated Storage URLs are stored in `recipes.photo_url`; the UI obtains temporary signed URLs for display.
 
 The recipe manager account is bound by user ID to `giannis.venizelos@gmail.com`. It can create and edit curated recipes and manage community submissions. Other users can create, edit and delete their own community recipes; edits and photo changes return their submissions to pending moderation. Database RPC checks and Storage RLS enforce this independently of UI controls.
 
