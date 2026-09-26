@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm run build:mobile",
+  "buildCommand": "npm run build",
   "outputDirectory": "apps/mobile/public",
   "framework": null,
   "cleanUrls": false,

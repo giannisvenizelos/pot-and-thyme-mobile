@@ -12,11 +12,11 @@ PoT & Thyme TEST is a Greek-language meal-planning web application. It combines 
 - **Offline support:** service worker with a versioned application-shell cache and IndexedDB catalogue/bootstrap cache.
 - **Language/UI:** Greek interface; Google Fonts variable families `Literata` (display/serif) and `Inter` (UI/sans), both loaded with their optical-size axis. Both ship a Greek subset — the previous `Playfair Display`/`Cormorant Garamond` pairing did not, so Greek headings silently fell back to Georgia.
 
-## Independent web and mobile deployments (2026-09-15)
+## Mobile deployment (2026-09-15)
 
-The browser interfaces are split into `apps/web/` and `apps/mobile/`. Each owns its entry point, renderer and styles. Common data/authentication and feature modules, legal pages and artwork live in `shared/`. `scripts/build.mjs` generates each app's static `public/` output and edition-specific service worker. The repository-root Vercel configuration builds the web edition, preserving the existing project URL. The dedicated mobile edition loads its own presentation at all widths.
+This repository's workspace and root commands target `apps/mobile/`, which owns its entry point, renderer and styles. Common data/authentication and feature modules, legal pages and artwork live in `shared/`. `scripts/build.mjs` generates the mobile app's static `public/` output and edition-specific service worker. The repository-root Vercel configuration builds the dedicated mobile edition, which loads its own presentation at all widths.
 
-The module inventory below describes the recovered modules; common files now live under `shared/`, and `app4.js` / `app.css` have separate copies under each app directory. Generated service workers replace the recovered `sw.js`.
+The module inventory below describes the recovered modules; common files now live under `shared/`, while the mobile `app4.js` and `app.css` live under `apps/mobile/`. The generated service worker replaces the recovered `sw.js`.
 
 ## Frontend modules
 
@@ -86,4 +86,4 @@ The imported breakfast recipes have instruction text in `source_text`, but 90 ha
 
 Photo-only edits now use the existing authenticated Storage and `set_recipe_photo` flow without rewriting or validating unrelated recipe fields. An editable-field signature distinguishes real edits from number-input serialization changes. Full recipe edits retain validation; errors and upload progress also appear beside Save, and upload retries retain the image without repeating a successful metadata write. Edit-modal row/category controls are explicitly bound after the modal is inserted.
 
-`npm run test:ui` includes integration regressions using each available edition's real renderers and event handlers, with HTTP and canvas boundaries mocked. Cases cover missing imported steps, photo-only preservation, metadata plus photo, upload/link retries and visible validation. These are not authenticated production upload tests. No database records, functions, RLS policies or bucket permissions were changed for this fix.
+`npm run test:ui` includes integration regressions using the mobile edition's real renderers and event handlers, with HTTP and canvas boundaries mocked. Cases cover missing imported steps, photo-only preservation, metadata plus photo, upload/link retries and visible validation. These are not authenticated production upload tests. No database records, functions, RLS policies or bucket permissions were changed for this fix.

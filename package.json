@@ -3,19 +3,15 @@
   "version": "1.0.0",
   "private": true,
   "workspaces": [
-    "apps/web",
     "apps/mobile"
   ],
   "scripts": {
-    "build": "node scripts/build.mjs web",
-    "build:web": "node scripts/build.mjs web",
-    "build:mobile": "node scripts/build.mjs mobile",
-    "build:all": "node scripts/build.mjs web && node scripts/build.mjs mobile",
-    "dev": "npm run build:web && npx serve apps/web/public -l 3000",
-    "dev:mobile": "npm run build:mobile && npx serve apps/mobile/public -l 3001",
+    "build": "node scripts/build.mjs mobile",
+    "dev": "npm run build && serve apps/mobile/public -l 3000",
     "test:ui": "node scripts/verify-recipe-ui.mjs && node scripts/verify-editor-integration.mjs mobile"
   },
   "devDependencies": {
-    "jsdom": "26.1.0"
+    "jsdom": "26.1.0",
+    "serve": "14.2.4"
   }
 }
