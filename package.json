@@ -8,7 +8,9 @@
   "scripts": {
     "build": "node scripts/build.mjs mobile",
     "dev": "npm run build && serve apps/mobile/public -l 3000",
-    "test:ui": "node scripts/verify-recipe-ui.mjs && node scripts/verify-editor-integration.mjs mobile"
+    "test:ui": "node scripts/verify-recipe-ui.mjs && node scripts/verify-editor-integration.mjs mobile",
+    "test:contracts": "node scripts/verify-api-contracts.mjs",
+    "test:integration:staging": "node scripts/test-staging-api.mjs"
   },
   "devDependencies": {
     "jsdom": "26.1.0",

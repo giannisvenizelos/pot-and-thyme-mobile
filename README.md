@@ -35,6 +35,12 @@ Connect the mobile Vercel project to this repository and use the settings above.
 
 This repository was recovered from public frontend assets on 2026-08-29. Serverless `/api/*` source, database migrations and private environment variables are absent. `/api/catalog` returned HTTP 404 on the existing deployment during the split. Catalogue and recipe details retain their existing direct Supabase fallback. AI fridge search still requires the missing `/api/ai-fridge` endpoint; splitting the frontends does not restore it. See `PROJECT.md` for recovery provenance.
 
+The PR 2B source search, evidence/access gaps, confirmed client-side API contracts, and the
+non-production reconstruction plan are recorded in [`docs/API_CONTRACTS.md`](docs/API_CONTRACTS.md).
+Run `npm run test:contracts` to verify those observations against the recovered client. The
+opt-in `npm run test:integration:staging` suite refuses known production hosts and requires
+an explicitly confirmed synthetic staging environment.
+
 ## Recipe management and photos
 
 The mobile edition supports photo upload and native phone camera capture. Desktop browsers can open a live camera preview. Images are resized to at most 1600 pixels, converted to JPEG and uploaded to the private Supabase `recipe-photos` bucket (5 MB limit). Stable authenticated Storage URLs are stored in `recipes.photo_url`; the UI obtains temporary signed URLs for display.
