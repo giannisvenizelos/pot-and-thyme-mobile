@@ -3,3 +3,7 @@ node_modules/
 .vercel/
 *.log
 apps/*/public/
+# Recovery exports may contain owner names, function constants, or other sensitive metadata.
+supabase/exports/
+supabase/.branches/
+supabase/.temp/
