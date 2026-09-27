@@ -1,0 +1,89 @@
+{
+  "fixtureSet": "synthetic-staging-v1",
+  "syntheticOnly": true,
+  "households": [
+    { "id": "syn-household-orchid", "name": "Fictional Orchid House" },
+    { "id": "syn-household-maple", "name": "Fictional Maple House" }
+  ],
+  "users": [
+    {
+      "id": "syn-user-orchid-owner",
+      "email": "orchid.owner@example.invalid",
+      "displayName": "Orchid Owner",
+      "householdRef": "syn-household-orchid"
+    },
+    {
+      "id": "syn-user-orchid-member",
+      "email": "orchid.member@example.invalid",
+      "displayName": "Orchid Member",
+      "householdRef": "syn-household-orchid"
+    },
+    {
+      "id": "syn-user-maple-owner",
+      "email": "maple.owner@example.invalid",
+      "displayName": "Maple Owner",
+      "householdRef": "syn-household-maple"
+    }
+  ],
+  "recipes": [
+    {
+      "id": "syn-recipe-orchid-public-soup",
+      "title": "Fictional Orchid Lentil Soup",
+      "ownerRef": "syn-user-orchid-owner",
+      "householdRef": "syn-household-orchid",
+      "visibility": "public"
+    },
+    {
+      "id": "syn-recipe-orchid-private-toast",
+      "title": "Fictional Orchid Garden Toast",
+      "ownerRef": "syn-user-orchid-member",
+      "householdRef": "syn-household-orchid",
+      "visibility": "household"
+    },
+    {
+      "id": "syn-recipe-maple-private-stew",
+      "title": "Fictional Maple Bean Stew",
+      "ownerRef": "syn-user-maple-owner",
+      "householdRef": "syn-household-maple",
+      "visibility": "household"
+    }
+  ],
+  "ingredients": [
+    { "id": "syn-ingredient-lentils", "recipeRef": "syn-recipe-orchid-public-soup", "position": 1, "label": "fictional red lentils" },
+    { "id": "syn-ingredient-carrot", "recipeRef": "syn-recipe-orchid-public-soup", "position": 2, "label": "fictional carrot" },
+    { "id": "syn-ingredient-bread", "recipeRef": "syn-recipe-orchid-private-toast", "position": 1, "label": "fictional bread" },
+    { "id": "syn-ingredient-herbs", "recipeRef": "syn-recipe-orchid-private-toast", "position": 2, "label": "fictional garden herbs" },
+    { "id": "syn-ingredient-beans", "recipeRef": "syn-recipe-maple-private-stew", "position": 1, "label": "fictional white beans" },
+    { "id": "syn-ingredient-celery", "recipeRef": "syn-recipe-maple-private-stew", "position": 2, "label": "fictional celery" }
+  ],
+  "mealPlans": [
+    {
+      "id": "syn-meal-plan-orchid-monday",
+      "householdRef": "syn-household-orchid",
+      "recipeRef": "syn-recipe-orchid-private-toast",
+      "slot": "fictional-monday-dinner"
+    },
+    {
+      "id": "syn-meal-plan-maple-tuesday",
+      "householdRef": "syn-household-maple",
+      "recipeRef": "syn-recipe-maple-private-stew",
+      "slot": "fictional-tuesday-dinner"
+    }
+  ],
+  "shoppingItems": [
+    { "id": "syn-shopping-orchid-lemon", "householdRef": "syn-household-orchid", "label": "fictional lemon", "checked": false },
+    { "id": "syn-shopping-orchid-oil", "householdRef": "syn-household-orchid", "label": "fictional olive oil", "checked": true },
+    { "id": "syn-shopping-maple-onion", "householdRef": "syn-household-maple", "label": "fictional onion", "checked": false },
+    { "id": "syn-shopping-maple-rice", "householdRef": "syn-household-maple", "label": "fictional rice", "checked": true }
+  ],
+  "cases": [
+    { "id": "syn-case-own-meal-plan-read", "actorRef": "syn-user-orchid-member", "action": "read", "resourceType": "mealPlan", "resourceRef": "syn-meal-plan-orchid-monday", "expect": "allow", "reason": "same-household access" },
+    { "id": "syn-case-own-shopping-update", "actorRef": "syn-user-maple-owner", "action": "update", "resourceType": "shoppingItem", "resourceRef": "syn-shopping-maple-onion", "expect": "allow", "reason": "same-household access" },
+    { "id": "syn-case-public-recipe-outsider-read", "actorRef": "syn-user-maple-owner", "action": "read", "resourceType": "recipe", "resourceRef": "syn-recipe-orchid-public-soup", "expect": "allow", "reason": "public recipe visibility" },
+    { "id": "syn-case-public-recipe-anonymous-read", "actorRef": "anonymous", "action": "read", "resourceType": "recipe", "resourceRef": "syn-recipe-orchid-public-soup", "expect": "allow", "reason": "public recipe visibility" },
+    { "id": "syn-case-cross-meal-plan-read", "actorRef": "syn-user-maple-owner", "action": "read", "resourceType": "mealPlan", "resourceRef": "syn-meal-plan-orchid-monday", "expect": "deny", "reason": "cross-household isolation" },
+    { "id": "syn-case-cross-shopping-update", "actorRef": "syn-user-orchid-owner", "action": "update", "resourceType": "shoppingItem", "resourceRef": "syn-shopping-maple-rice", "expect": "deny", "reason": "cross-household isolation" },
+    { "id": "syn-case-private-recipe-outsider-read", "actorRef": "syn-user-maple-owner", "action": "read", "resourceType": "recipe", "resourceRef": "syn-recipe-orchid-private-toast", "expect": "deny", "reason": "household-only recipe visibility" },
+    { "id": "syn-case-private-recipe-anonymous-read", "actorRef": "anonymous", "action": "read", "resourceType": "recipe", "resourceRef": "syn-recipe-maple-private-stew", "expect": "deny", "reason": "household-only recipe visibility" }
+  ]
+}

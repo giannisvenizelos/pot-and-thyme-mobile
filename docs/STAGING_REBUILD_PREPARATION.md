@@ -41,10 +41,15 @@ Historical SQL is change evidence, not an executable baseline and must not be co
 1. Keep this inventory and the observed API contracts synchronized with tracked client calls.
 2. Keep the staging guards fail-closed: only the named staging ref, explicit synthetic-data
    confirmation, manual link verification, and migration dry-run are permitted.
-3. Specify deterministic fixtures using reserved/example values: fixed fictional UUIDs,
+3. Specify deterministic fixtures using reserved/example values: fixed fictional identifiers,
    `example.invalid` email addresses, generated images, fictional households, recipes, plans,
    and shopping items. Never use copied, sampled, masked, or pseudonymized production rows.
 4. Define the acceptance matrix below without executing it remotely.
+
+The repository-only domain fixtures and positive/negative cases are defined in
+`fixtures/staging/synthetic-fixtures.json`. Their database/RPC adapter remains explicitly blocked,
+as documented in `fixtures/staging/README.md`, until the reviewed schema is approved. Run
+`npm run test:fixtures` to validate them without a database or network connection.
 
 ### Mandatory gate: two-person schema review
 
