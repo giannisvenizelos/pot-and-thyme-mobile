@@ -2,11 +2,15 @@
 set -euo pipefail
 
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
+PRODUCTION_PROJECT_REF='ccvdkbdnykfhenhqkicm'
+STAGING_PROJECT_REF='vjtvjdhwdwwyjfomxfqs'
 command -v pg_dump >/dev/null || die 'pg_dump is required'
 command -v psql >/dev/null || die 'psql is required'
 : "${DATABASE_URL:?Set DATABASE_URL to the temporary read-only production connection URI}"
 : "${EXPECTED_PROJECT_REF:?Set EXPECTED_PROJECT_REF to the approved project ref}"
 [[ "${READ_ONLY_CONFIRMED:-}" == yes ]] || die 'Set READ_ONLY_CONFIRMED=yes after the database owner confirms the role is read-only'
+[[ "$EXPECTED_PROJECT_REF" == "$PRODUCTION_PROJECT_REF" ]] || die 'This collector is production-only; EXPECTED_PROJECT_REF is not the approved production ref'
+[[ "$EXPECTED_PROJECT_REF" != "$STAGING_PROJECT_REF" ]] || die 'Refusing to label the staging project as production evidence'
 [[ "$DATABASE_URL" == *"${EXPECTED_PROJECT_REF}"* ]] || die 'DATABASE_URL does not contain EXPECTED_PROJECT_REF'
 
 umask 077
@@ -29,10 +33,13 @@ psql "$DATABASE_URL" -X -v ON_ERROR_STOP=1 -At \
   -f scripts/sql/catalog-metadata.sql >"$out/catalog-metadata.jsonl"
 psql "$DATABASE_URL" -X -v ON_ERROR_STOP=1 -At \
   -f scripts/sql/security-metadata.sql >"$out/security-metadata.jsonl"
+psql "$DATABASE_URL" -X -v ON_ERROR_STOP=1 -At \
+  -f scripts/sql/private-security-inventory.sql >"$out/private-security-inventory.jsonl"
 
 (
   cd "$out"
   sha256sum connection.txt schema.raw.sql catalog-metadata.jsonl security-metadata.jsonl \
+    private-security-inventory.jsonl \
     >SHA256SUMS
 )
 printf 'Read-only schema evidence written to %s\n' "$out"

@@ -3,10 +3,12 @@
 **Status:** preparation only / blocked on authorized exports (2026-09-27).  
 **Production changes:** none. **Remote migrations:** none. **Production data copied:** none.
 
-This document continues the PR 2A inventory/recovery plan and the PR 2B API contracts from
-the latest `main` merge (`b639bbe`). There is no production database credential or isolated
-staging project in this environment. Therefore this PR does **not** claim that the production
-schema has been recovered, that a baseline is complete, or that a restore has passed.
+This follow-up starts from the PR #4 merge (`1d32a9c`). Production is
+`ccvdkbdnykfhenhqkicm`; the separate, empty staging project is
+`vjtvjdhwdwwyjfomxfqs`. There is no authorized production schema export in this repository or
+environment. Therefore this PR does **not** claim that the production schema has been recovered,
+that a baseline exists, or that either local or staging rebuild has passed. The **actual
+baseline is currently “no executable migration”**, as recorded by the holding-area README.
 
 ## 1. Repository SQL inventory and confidence
 
@@ -46,7 +48,7 @@ encrypted evidence store until a reviewer removes secrets, email addresses, proj
 URLs, ownership statements, and other environment-specific values. No user rows, password
 hashes, object paths, JWTs, keys, or production personal data are requested.
 
-## 3. Separate security evidence (input to PR 2D)
+## 3. Separate read-only security inventory (input to PR 2D)
 
 Security evidence is intentionally kept separate from the baseline transformation:
 
@@ -66,6 +68,23 @@ privileges and role memberships through an approved metadata channel if the audi
 see them. PR 2D must evaluate effective access; merely preserving current policies is not a
 security approval.
 
+The follow-up collector also writes `private-security-inventory.jsonl`, separately from the
+general security output. It selects (a) every ordinary/partitioned table in schema `private`
+whose catalog RLS flag is off and (b) every non-system `SECURITY DEFINER` routine, including its
+exact overload, owner, ACL, configuration and definition. We have been told there are **three
+private tables without RLS**, but the repository proves only the name
+`private.recipe_management_owner`; it does not prove the other two names or the current count.
+Their names, columns, owners, grants, dependencies, intended callers, sensitivity, and reason
+for relying on schema/grant isolation rather than RLS are therefore explicit missing evidence.
+Likewise, the historical SQL's six definer functions are not proof of the live routine set.
+
+Acceptance of this inventory requires a reviewer to reconcile the live result to exactly three
+reported no-RLS private tables (or document why the reported count changed), inspect direct and
+indirect grants for each, and enumerate every definer overload. Each definer must have a fixed,
+safe `search_path`, schema-qualified object references, an expected non-login owner, least-
+privilege `EXECUTE` grants, and reviewed body/constants. An empty or truncated result, a count
+assertion without catalog output, or copying these definitions into a migration is not accepted.
+
 ## 4. Authorized read-only export runbook
 
 ### Preconditions
@@ -84,14 +103,16 @@ security approval.
 
 ```bash
 export DATABASE_URL='(retrieve read-only URI from secret manager)'
-export EXPECTED_PROJECT_REF='(approved production ref)'
+export EXPECTED_PROJECT_REF='ccvdkbdnykfhenhqkicm'
 export READ_ONLY_CONFIRMED=yes
 export EXPORT_DIR='/encrypted/evidence/pr-2c'
 bash scripts/export-supabase-schema.sh
 ```
 
-The collector runs `pg_dump --schema-only` and read-only catalog queries. It produces a raw SQL
-dump, structural JSONL, separate security JSONL, connection identity, and SHA-256 manifest.
+The collector has the production ref embedded as an additional fail-closed identity check. It
+runs `pg_dump --schema-only` and read-only catalog queries. It produces a raw SQL dump,
+structural JSONL, general security JSONL, the focused private/definer security JSONL, connection
+identity, and a SHA-256 manifest.
 It never invokes `supabase db push`, `db reset`, migration repair, DDL, DML, or an HTTP mutation.
 If catalog permissions are insufficient, stop and have the owner adjust/read the metadata;
 never escalate by substituting an unrestricted production credential.
@@ -120,9 +141,11 @@ household tables/functions to satisfy the client.
    OAuth callbacks, SMTP/SMS providers, log drains, Storage objects, or third-party AI billing.
    Deny outbound integrations until explicitly allow-listed.
 2. Pin and record the Supabase CLI/Postgres client versions. Link only after verifying the
-   staging project ref twice. Add a guard in any future apply script that rejects the production
-   ref and requires an explicit staging ref. Never execute remote migration commands from CI
-   until that guard is reviewed.
+   staging project ref twice. `scripts/verify-staging-migrations.sh` rejects the production ref,
+   rejects every ref other than the named staging project, confirms the CLI's linked-ref file,
+   and requires a deliberate confirmation variable. It stops before any CLI call while the
+   baseline is absent. When a reviewed baseline exists, it runs only migration-history listing
+   and `db push --dry-run`; it never applies migrations.
 3. Apply the reviewed baseline to a clean local database first, then to the isolated staging
    project. Capture command versions, logs, schema fingerprint, and migration table state.
 4. Generate deterministic fictional UUIDs, `example.invalid` emails, households, recipes,
@@ -134,6 +157,19 @@ household tables/functions to satisfy the client.
    tenants. Run twice after clean rebuilds and compare schema fingerprints.
 6. Destroy staging test identities/artifacts according to the approved retention period. Never
    promote the staging database or its credentials into production.
+
+The guarded dry-run, after an operator has manually linked only the staging project, is:
+
+```bash
+TARGET_PROJECT_REF='vjtvjdhwdwwyjfomxfqs' \
+STAGING_VERIFICATION_CONFIRMED=yes \
+npm run verify:migrations:staging
+```
+
+Today this command must report `BLOCKED: no reviewed schema baseline exists`. That is the safe,
+expected result—not a successful rebuild. A staging rebuild remains blocked until authoritative
+DDL is reviewed and committed in a later authorized change; this follow-up does not link a
+project, execute a migration, or create a project.
 
 ## 6. Evidence and completion criteria
 
@@ -152,6 +188,12 @@ PR 2C can be called **complete schema recovery** only when all boxes below have 
   no production PII, credentials, object paths, or remote production writes occur.
 - [ ] Restore logs, deviations, owners, and follow-up security findings are retained in the
   approved evidence store.
+- [ ] The focused inventory accounts for the reported three private no-RLS tables and every
+  `SECURITY DEFINER` overload, with grants, ownership, safe `search_path`, dependencies, and
+  reviewer disposition recorded without asserting that “private” alone makes them safe.
+- [ ] The guarded staging command verifies the linked ref is `vjtvjdhwdwwyjfomxfqs`, rejects
+  `ccvdkbdnykfhenhqkicm`, and completes history inspection plus a dry-run only. A real clean
+  rebuild is separate, explicitly approved future work.
 
 ### Current blockers / exact handoff request
 

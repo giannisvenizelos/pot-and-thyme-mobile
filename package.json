@@ -11,7 +11,8 @@
     "test:ui": "node scripts/verify-recipe-ui.mjs && node scripts/verify-editor-integration.mjs mobile",
     "test:contracts": "node scripts/verify-api-contracts.mjs",
     "test:integration:staging": "node scripts/test-staging-api.mjs",
-    "test:schema-recovery": "bash -n scripts/export-supabase-schema.sh && node scripts/verify-schema-recovery.mjs"
+    "test:schema-recovery": "bash -n scripts/export-supabase-schema.sh scripts/verify-staging-migrations.sh && node scripts/verify-schema-recovery.mjs",
+    "verify:migrations:staging": "bash scripts/verify-staging-migrations.sh"
   },
   "devDependencies": {
     "jsdom": "26.1.0",
