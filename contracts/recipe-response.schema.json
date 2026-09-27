@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pot-and-thyme.invalid/contracts/recipe-response.schema.json",
+  "title": "Observed GET /api/recipe response",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["id", "title", "recipe_ingredients", "recipe_steps"],
+    "properties": {
+      "id": { "type": ["integer", "string"] },
+      "title": { "type": "string" },
+      "meal": { "type": ["string", "null"] },
+      "subcategory": { "type": ["string", "null"] },
+      "description": { "type": ["string", "null"] },
+      "servings": { "type": ["number", "null"] },
+      "prep_minutes": { "type": ["number", "null"] },
+      "cook_minutes": { "type": ["number", "null"] },
+      "photo_url": { "type": ["string", "null"] },
+      "recipe_ingredients": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["position"],
+          "properties": {
+            "position": { "type": "number" },
+            "raw": { "type": ["string", "null"] },
+            "qty_min": { "type": ["number", "null"] },
+            "qty_max": { "type": ["number", "null"] },
+            "unit": { "type": ["string", "null"] },
+            "item": { "type": ["string", "null"] },
+            "category": { "type": ["string", "null"] },
+            "option_code": { "type": ["string", "null"] }
+          },
+          "additionalProperties": true
+        }
+      },
+      "recipe_steps": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["position", "instruction"],
+          "properties": {
+            "position": { "type": "number" },
+            "instruction": { "type": "string" }
+          },
+          "additionalProperties": true
+        }
+      }
+    },
+    "additionalProperties": true
+  }
+}

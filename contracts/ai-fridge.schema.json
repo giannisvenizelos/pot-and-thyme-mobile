@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pot-and-thyme.invalid/contracts/ai-fridge.schema.json",
+  "title": "Observed POST /api/ai-fridge contract",
+  "$defs": {
+    "request": {
+      "type": "object",
+      "required": ["text"],
+      "properties": { "text": { "type": "string" } },
+      "additionalProperties": false
+    },
+    "response": {
+      "type": "object",
+      "required": ["matches", "ingredients", "mode", "usage", "notice"],
+      "properties": {
+        "matches": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "title", "missing_count", "missing", "match_percent", "prep_minutes", "cook_minutes"],
+            "properties": {
+              "id": { "type": ["integer", "string"] },
+              "title": { "type": "string" },
+              "missing_count": { "type": "integer", "minimum": 0 },
+              "missing": { "type": "array", "items": { "type": "string" } },
+              "match_percent": { "type": "number" },
+              "prep_minutes": { "type": ["number", "null"] },
+              "cook_minutes": { "type": ["number", "null"] }
+            },
+            "additionalProperties": true
+          }
+        },
+        "ingredients": { "type": "array", "items": { "type": "string" } },
+        "mode": { "type": "string", "enum": ["ai", "local"] },
+        "usage": {
+          "type": ["object", "null"],
+          "properties": { "remaining": { "type": ["number", "string"] } },
+          "required": ["remaining"],
+          "additionalProperties": true
+        },
+        "notice": { "type": ["string", "null"] }
+      },
+      "additionalProperties": true
+    },
+    "observedError": {
+      "type": "object",
+      "required": ["message"],
+      "properties": { "message": { "type": "string" } },
+      "additionalProperties": true
+    }
+  }
+}

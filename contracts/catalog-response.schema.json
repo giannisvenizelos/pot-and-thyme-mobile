@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pot-and-thyme.invalid/contracts/catalog-response.schema.json",
+  "title": "Observed GET /api/catalog response",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["id", "title", "meal", "subcategory", "prep_minutes", "cook_minutes", "created_at", "created_by", "recipe_origin", "moderation_status", "photo_url"],
+    "properties": {
+      "id": { "type": ["integer", "string"] },
+      "title": { "type": "string" },
+      "meal": { "type": ["string", "null"] },
+      "subcategory": { "type": ["string", "null"] },
+      "prep_minutes": { "type": ["number", "null"] },
+      "cook_minutes": { "type": ["number", "null"] },
+      "created_at": { "type": ["string", "null"] },
+      "created_by": { "type": ["string", "null"] },
+      "recipe_origin": { "type": ["string", "null"] },
+      "moderation_status": { "type": ["string", "null"] },
+      "photo_url": { "type": ["string", "null"] }
+    },
+    "additionalProperties": true
+  }
+}
