@@ -79,6 +79,7 @@
   "cases": [
     { "id": "syn-case-own-meal-plan-read", "actorRef": "syn-user-orchid-member", "action": "read", "resourceType": "mealPlan", "resourceRef": "syn-meal-plan-orchid-monday", "expect": "allow", "reason": "same-household access" },
     { "id": "syn-case-own-shopping-update", "actorRef": "syn-user-maple-owner", "action": "update", "resourceType": "shoppingItem", "resourceRef": "syn-shopping-maple-onion", "expect": "allow", "reason": "same-household access" },
+    { "id": "syn-case-private-recipe-member-read", "actorRef": "syn-user-orchid-owner", "action": "read", "resourceType": "recipe", "resourceRef": "syn-recipe-orchid-private-toast", "expect": "allow", "reason": "same-household recipe visibility" },
     { "id": "syn-case-public-recipe-outsider-read", "actorRef": "syn-user-maple-owner", "action": "read", "resourceType": "recipe", "resourceRef": "syn-recipe-orchid-public-soup", "expect": "allow", "reason": "public recipe visibility" },
     { "id": "syn-case-public-recipe-anonymous-read", "actorRef": "anonymous", "action": "read", "resourceType": "recipe", "resourceRef": "syn-recipe-orchid-public-soup", "expect": "allow", "reason": "public recipe visibility" },
     { "id": "syn-case-cross-meal-plan-read", "actorRef": "syn-user-maple-owner", "action": "read", "resourceType": "mealPlan", "resourceRef": "syn-meal-plan-orchid-monday", "expect": "deny", "reason": "cross-household isolation" },
