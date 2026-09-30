@@ -1,52 +1,27 @@
 {
-  "fixtureSet": "synthetic-staging-v1",
+  "fixtureSet": "synthetic-staging-v2",
   "syntheticOnly": true,
+  "coverage": {
+    "householdScopedResourceTypes": ["mealPlan", "shoppingItem"],
+    "rpcOnlyWrites": {
+      "mealPlan": ["insert", "update", "delete"],
+      "shoppingItem": ["insert", "update", "delete"]
+    },
+    "requiredCategories": ["household-isolation", "rpc-only-write", "security-definer-rpc", "realtime-isolation", "storage-isolation"]
+  },
   "households": [
     { "id": "syn-household-orchid", "name": "Fictional Orchid House" },
     { "id": "syn-household-maple", "name": "Fictional Maple House" }
   ],
   "users": [
-    {
-      "id": "syn-user-orchid-owner",
-      "email": "orchid.owner@example.invalid",
-      "displayName": "Orchid Owner",
-      "householdRef": "syn-household-orchid"
-    },
-    {
-      "id": "syn-user-orchid-member",
-      "email": "orchid.member@example.invalid",
-      "displayName": "Orchid Member",
-      "householdRef": "syn-household-orchid"
-    },
-    {
-      "id": "syn-user-maple-owner",
-      "email": "maple.owner@example.invalid",
-      "displayName": "Maple Owner",
-      "householdRef": "syn-household-maple"
-    }
+    { "id": "syn-user-orchid-owner", "email": "orchid.owner@example.invalid", "displayName": "Orchid Owner", "householdRef": "syn-household-orchid" },
+    { "id": "syn-user-orchid-member", "email": "orchid.member@example.invalid", "displayName": "Orchid Member", "householdRef": "syn-household-orchid" },
+    { "id": "syn-user-maple-owner", "email": "maple.owner@example.invalid", "displayName": "Maple Owner", "householdRef": "syn-household-maple" }
   ],
   "recipes": [
-    {
-      "id": "syn-recipe-orchid-public-soup",
-      "title": "Fictional Orchid Lentil Soup",
-      "ownerRef": "syn-user-orchid-owner",
-      "householdRef": "syn-household-orchid",
-      "visibility": "public"
-    },
-    {
-      "id": "syn-recipe-orchid-private-toast",
-      "title": "Fictional Orchid Garden Toast",
-      "ownerRef": "syn-user-orchid-member",
-      "householdRef": "syn-household-orchid",
-      "visibility": "household"
-    },
-    {
-      "id": "syn-recipe-maple-private-stew",
-      "title": "Fictional Maple Bean Stew",
-      "ownerRef": "syn-user-maple-owner",
-      "householdRef": "syn-household-maple",
-      "visibility": "household"
-    }
+    { "id": "syn-recipe-orchid-public-soup", "title": "Fictional Orchid Lentil Soup", "ownerRef": "syn-user-orchid-owner", "householdRef": "syn-household-orchid", "visibility": "public" },
+    { "id": "syn-recipe-orchid-private-toast", "title": "Fictional Orchid Garden Toast", "ownerRef": "syn-user-orchid-member", "householdRef": "syn-household-orchid", "visibility": "household" },
+    { "id": "syn-recipe-maple-private-stew", "title": "Fictional Maple Bean Stew", "ownerRef": "syn-user-maple-owner", "householdRef": "syn-household-maple", "visibility": "household" }
   ],
   "ingredients": [
     { "id": "syn-ingredient-lentils", "recipeRef": "syn-recipe-orchid-public-soup", "position": 1, "label": "fictional red lentils" },
@@ -57,34 +32,65 @@
     { "id": "syn-ingredient-celery", "recipeRef": "syn-recipe-maple-private-stew", "position": 2, "label": "fictional celery" }
   ],
   "mealPlans": [
-    {
-      "id": "syn-meal-plan-orchid-monday",
-      "householdRef": "syn-household-orchid",
-      "recipeRef": "syn-recipe-orchid-private-toast",
-      "slot": "fictional-monday-dinner"
-    },
-    {
-      "id": "syn-meal-plan-maple-tuesday",
-      "householdRef": "syn-household-maple",
-      "recipeRef": "syn-recipe-maple-private-stew",
-      "slot": "fictional-tuesday-dinner"
-    }
+    { "id": "syn-meal-plan-orchid-monday", "householdRef": "syn-household-orchid", "recipeRef": "syn-recipe-orchid-private-toast", "slot": "fictional-monday-dinner" },
+    { "id": "syn-meal-plan-maple-tuesday", "householdRef": "syn-household-maple", "recipeRef": "syn-recipe-maple-private-stew", "slot": "fictional-tuesday-dinner" }
   ],
   "shoppingItems": [
     { "id": "syn-shopping-orchid-lemon", "householdRef": "syn-household-orchid", "label": "fictional lemon", "checked": false },
-    { "id": "syn-shopping-orchid-oil", "householdRef": "syn-household-orchid", "label": "fictional olive oil", "checked": true },
-    { "id": "syn-shopping-maple-onion", "householdRef": "syn-household-maple", "label": "fictional onion", "checked": false },
-    { "id": "syn-shopping-maple-rice", "householdRef": "syn-household-maple", "label": "fictional rice", "checked": true }
+    { "id": "syn-shopping-maple-onion", "householdRef": "syn-household-maple", "label": "fictional onion", "checked": false }
+  ],
+  "storageObjects": [
+    { "id": "syn-object-orchid-owner-card", "path": "synthetic/orchid/owner/fictional-recipe-card.png", "ownerRef": "syn-user-orchid-owner", "householdRef": "syn-household-orchid" },
+    { "id": "syn-object-maple-owner-card", "path": "synthetic/maple/owner/fictional-pantry-card.png", "ownerRef": "syn-user-maple-owner", "householdRef": "syn-household-maple" }
+  ],
+  "rpcPaths": [
+    { "id": "syn-rpc-save-meal-plan", "name": "fictional_save_meal_plan", "securityMode": "definer", "resourceType": "mealPlan" },
+    { "id": "syn-rpc-set-shopping-item", "name": "fictional_set_shopping_item", "securityMode": "definer", "resourceType": "shoppingItem" }
   ],
   "cases": [
-    { "id": "syn-case-own-meal-plan-read", "actorRef": "syn-user-orchid-member", "action": "read", "resourceType": "mealPlan", "resourceRef": "syn-meal-plan-orchid-monday", "expect": "allow", "reason": "same-household access" },
-    { "id": "syn-case-own-shopping-update", "actorRef": "syn-user-maple-owner", "action": "update", "resourceType": "shoppingItem", "resourceRef": "syn-shopping-maple-onion", "expect": "allow", "reason": "same-household access" },
-    { "id": "syn-case-private-recipe-member-read", "actorRef": "syn-user-orchid-owner", "action": "read", "resourceType": "recipe", "resourceRef": "syn-recipe-orchid-private-toast", "expect": "allow", "reason": "same-household recipe visibility" },
-    { "id": "syn-case-public-recipe-outsider-read", "actorRef": "syn-user-maple-owner", "action": "read", "resourceType": "recipe", "resourceRef": "syn-recipe-orchid-public-soup", "expect": "allow", "reason": "public recipe visibility" },
-    { "id": "syn-case-public-recipe-anonymous-read", "actorRef": "anonymous", "action": "read", "resourceType": "recipe", "resourceRef": "syn-recipe-orchid-public-soup", "expect": "allow", "reason": "public recipe visibility" },
-    { "id": "syn-case-cross-meal-plan-read", "actorRef": "syn-user-maple-owner", "action": "read", "resourceType": "mealPlan", "resourceRef": "syn-meal-plan-orchid-monday", "expect": "deny", "reason": "cross-household isolation" },
-    { "id": "syn-case-cross-shopping-update", "actorRef": "syn-user-orchid-owner", "action": "update", "resourceType": "shoppingItem", "resourceRef": "syn-shopping-maple-rice", "expect": "deny", "reason": "cross-household isolation" },
-    { "id": "syn-case-private-recipe-outsider-read", "actorRef": "syn-user-maple-owner", "action": "read", "resourceType": "recipe", "resourceRef": "syn-recipe-orchid-private-toast", "expect": "deny", "reason": "household-only recipe visibility" },
-    { "id": "syn-case-private-recipe-anonymous-read", "actorRef": "anonymous", "action": "read", "resourceType": "recipe", "resourceRef": "syn-recipe-maple-private-stew", "expect": "deny", "reason": "household-only recipe visibility" }
+    { "id": "syn-case-private-recipe-member-read", "category": "recipe-visibility", "surface": "table", "actorRef": "syn-user-orchid-owner", "action": "read", "resourceType": "recipe", "resourceRef": "syn-recipe-orchid-private-toast", "expect": "allow" },
+    { "id": "syn-case-public-recipe-outsider-read", "category": "recipe-visibility", "surface": "table", "actorRef": "syn-user-maple-owner", "action": "read", "resourceType": "recipe", "resourceRef": "syn-recipe-orchid-public-soup", "expect": "allow" },
+    { "id": "syn-case-public-recipe-anonymous-read", "category": "recipe-visibility", "surface": "table", "actorRef": "anonymous", "action": "read", "resourceType": "recipe", "resourceRef": "syn-recipe-orchid-public-soup", "expect": "allow" },
+    { "id": "syn-case-private-recipe-outsider-read", "category": "recipe-visibility", "surface": "table", "actorRef": "syn-user-maple-owner", "action": "read", "resourceType": "recipe", "resourceRef": "syn-recipe-orchid-private-toast", "expect": "deny" },
+    { "id": "syn-case-private-recipe-anonymous-read", "category": "recipe-visibility", "surface": "table", "actorRef": "anonymous", "action": "read", "resourceType": "recipe", "resourceRef": "syn-recipe-maple-private-stew", "expect": "deny" },
+
+    { "id": "syn-case-cross-meal-plan-read", "category": "household-isolation", "surface": "table", "actorRef": "syn-user-maple-owner", "action": "read", "resourceType": "mealPlan", "resourceRef": "syn-meal-plan-orchid-monday", "expect": "deny" },
+    { "id": "syn-case-cross-meal-plan-insert", "category": "household-isolation", "surface": "rpc", "pathRef": "syn-rpc-save-meal-plan", "actorRef": "syn-user-maple-owner", "action": "insert", "resourceType": "mealPlan", "resourceRef": "syn-meal-plan-orchid-monday", "expect": "deny" },
+    { "id": "syn-case-cross-meal-plan-update", "category": "household-isolation", "surface": "rpc", "pathRef": "syn-rpc-save-meal-plan", "actorRef": "syn-user-maple-owner", "action": "update", "resourceType": "mealPlan", "resourceRef": "syn-meal-plan-orchid-monday", "expect": "deny" },
+    { "id": "syn-case-cross-meal-plan-delete", "category": "household-isolation", "surface": "rpc", "pathRef": "syn-rpc-save-meal-plan", "actorRef": "syn-user-maple-owner", "action": "delete", "resourceType": "mealPlan", "resourceRef": "syn-meal-plan-orchid-monday", "expect": "deny" },
+    { "id": "syn-case-cross-shopping-read", "category": "household-isolation", "surface": "table", "actorRef": "syn-user-orchid-owner", "action": "read", "resourceType": "shoppingItem", "resourceRef": "syn-shopping-maple-onion", "expect": "deny" },
+    { "id": "syn-case-cross-shopping-insert", "category": "household-isolation", "surface": "rpc", "pathRef": "syn-rpc-set-shopping-item", "actorRef": "syn-user-orchid-owner", "action": "insert", "resourceType": "shoppingItem", "resourceRef": "syn-shopping-maple-onion", "expect": "deny" },
+    { "id": "syn-case-cross-shopping-update", "category": "household-isolation", "surface": "rpc", "pathRef": "syn-rpc-set-shopping-item", "actorRef": "syn-user-orchid-owner", "action": "update", "resourceType": "shoppingItem", "resourceRef": "syn-shopping-maple-onion", "expect": "deny" },
+    { "id": "syn-case-cross-shopping-delete", "category": "household-isolation", "surface": "rpc", "pathRef": "syn-rpc-set-shopping-item", "actorRef": "syn-user-orchid-owner", "action": "delete", "resourceType": "shoppingItem", "resourceRef": "syn-shopping-maple-onion", "expect": "deny" },
+
+    { "id": "syn-case-table-meal-plan-insert", "category": "rpc-only-write", "surface": "table", "actorRef": "syn-user-orchid-owner", "action": "insert", "resourceType": "mealPlan", "resourceRef": "syn-meal-plan-orchid-monday", "expect": "deny" },
+    { "id": "syn-case-table-meal-plan-update", "category": "rpc-only-write", "surface": "table", "actorRef": "syn-user-orchid-owner", "action": "update", "resourceType": "mealPlan", "resourceRef": "syn-meal-plan-orchid-monday", "expect": "deny" },
+    { "id": "syn-case-table-meal-plan-delete", "category": "rpc-only-write", "surface": "table", "actorRef": "syn-user-orchid-owner", "action": "delete", "resourceType": "mealPlan", "resourceRef": "syn-meal-plan-orchid-monday", "expect": "deny" },
+    { "id": "syn-case-table-shopping-insert", "category": "rpc-only-write", "surface": "table", "actorRef": "syn-user-maple-owner", "action": "insert", "resourceType": "shoppingItem", "resourceRef": "syn-shopping-maple-onion", "expect": "deny" },
+    { "id": "syn-case-table-shopping-update", "category": "rpc-only-write", "surface": "table", "actorRef": "syn-user-maple-owner", "action": "update", "resourceType": "shoppingItem", "resourceRef": "syn-shopping-maple-onion", "expect": "deny" },
+    { "id": "syn-case-table-shopping-delete", "category": "rpc-only-write", "surface": "table", "actorRef": "syn-user-maple-owner", "action": "delete", "resourceType": "shoppingItem", "resourceRef": "syn-shopping-maple-onion", "expect": "deny" },
+
+    { "id": "syn-case-rpc-meal-plan-authorized", "category": "security-definer-rpc", "surface": "rpc", "pathRef": "syn-rpc-save-meal-plan", "actorRef": "syn-user-orchid-member", "action": "update", "resourceType": "mealPlan", "resourceRef": "syn-meal-plan-orchid-monday", "expect": "allow" },
+    { "id": "syn-case-rpc-meal-plan-unauthorized", "category": "security-definer-rpc", "surface": "rpc", "pathRef": "syn-rpc-save-meal-plan", "actorRef": "anonymous", "action": "update", "resourceType": "mealPlan", "resourceRef": "syn-meal-plan-orchid-monday", "expect": "deny" },
+    { "id": "syn-case-rpc-shopping-authorized", "category": "security-definer-rpc", "surface": "rpc", "pathRef": "syn-rpc-set-shopping-item", "actorRef": "syn-user-maple-owner", "action": "update", "resourceType": "shoppingItem", "resourceRef": "syn-shopping-maple-onion", "expect": "allow" },
+    { "id": "syn-case-rpc-shopping-unauthorized", "category": "security-definer-rpc", "surface": "rpc", "pathRef": "syn-rpc-set-shopping-item", "actorRef": "anonymous", "action": "update", "resourceType": "shoppingItem", "resourceRef": "syn-shopping-maple-onion", "expect": "deny" },
+
+    { "id": "syn-case-realtime-own-event", "category": "realtime-isolation", "surface": "realtime", "actorRef": "syn-user-orchid-member", "action": "receive", "resourceType": "shoppingItem", "resourceRef": "syn-shopping-orchid-lemon", "expect": "allow" },
+    { "id": "syn-case-realtime-cross-event", "category": "realtime-isolation", "surface": "realtime", "actorRef": "syn-user-maple-owner", "action": "receive", "resourceType": "shoppingItem", "resourceRef": "syn-shopping-orchid-lemon", "expect": "deny" },
+    { "id": "syn-case-realtime-maple-own-event", "category": "realtime-isolation", "surface": "realtime", "actorRef": "syn-user-maple-owner", "action": "receive", "resourceType": "shoppingItem", "resourceRef": "syn-shopping-maple-onion", "expect": "allow" },
+    { "id": "syn-case-realtime-orchid-cross-event", "category": "realtime-isolation", "surface": "realtime", "actorRef": "syn-user-orchid-owner", "action": "receive", "resourceType": "shoppingItem", "resourceRef": "syn-shopping-maple-onion", "expect": "deny" },
+
+    { "id": "syn-case-storage-owner-upload", "category": "storage-isolation", "surface": "storage", "actorRef": "syn-user-orchid-owner", "action": "upload", "resourceType": "storageObject", "resourceRef": "syn-object-orchid-owner-card", "expect": "allow" },
+    { "id": "syn-case-storage-owner-read", "category": "storage-isolation", "surface": "storage", "actorRef": "syn-user-orchid-owner", "action": "read", "resourceType": "storageObject", "resourceRef": "syn-object-orchid-owner-card", "expect": "allow" },
+    { "id": "syn-case-storage-owner-sign", "category": "storage-isolation", "surface": "storage", "actorRef": "syn-user-orchid-owner", "action": "sign", "resourceType": "storageObject", "resourceRef": "syn-object-orchid-owner-card", "expect": "allow" },
+    { "id": "syn-case-storage-owner-delete", "category": "storage-isolation", "surface": "storage", "actorRef": "syn-user-orchid-owner", "action": "delete", "resourceType": "storageObject", "resourceRef": "syn-object-orchid-owner-card", "expect": "allow" },
+    { "id": "syn-case-storage-member-upload", "category": "storage-isolation", "surface": "storage", "actorRef": "syn-user-orchid-member", "action": "upload", "resourceType": "storageObject", "resourceRef": "syn-object-orchid-owner-card", "expect": "deny" },
+    { "id": "syn-case-storage-member-read", "category": "storage-isolation", "surface": "storage", "actorRef": "syn-user-orchid-member", "action": "read", "resourceType": "storageObject", "resourceRef": "syn-object-orchid-owner-card", "expect": "deny" },
+    { "id": "syn-case-storage-member-sign", "category": "storage-isolation", "surface": "storage", "actorRef": "syn-user-orchid-member", "action": "sign", "resourceType": "storageObject", "resourceRef": "syn-object-orchid-owner-card", "expect": "deny" },
+    { "id": "syn-case-storage-member-delete", "category": "storage-isolation", "surface": "storage", "actorRef": "syn-user-orchid-member", "action": "delete", "resourceType": "storageObject", "resourceRef": "syn-object-orchid-owner-card", "expect": "deny" },
+    { "id": "syn-case-storage-outsider-upload", "category": "storage-isolation", "surface": "storage", "actorRef": "syn-user-maple-owner", "action": "upload", "resourceType": "storageObject", "resourceRef": "syn-object-orchid-owner-card", "expect": "deny" },
+    { "id": "syn-case-storage-outsider-read", "category": "storage-isolation", "surface": "storage", "actorRef": "syn-user-maple-owner", "action": "read", "resourceType": "storageObject", "resourceRef": "syn-object-orchid-owner-card", "expect": "deny" },
+    { "id": "syn-case-storage-outsider-sign", "category": "storage-isolation", "surface": "storage", "actorRef": "syn-user-maple-owner", "action": "sign", "resourceType": "storageObject", "resourceRef": "syn-object-orchid-owner-card", "expect": "deny" },
+    { "id": "syn-case-storage-outsider-delete", "category": "storage-isolation", "surface": "storage", "actorRef": "syn-user-maple-owner", "action": "delete", "resourceType": "storageObject", "resourceRef": "syn-object-orchid-owner-card", "expect": "deny" }
   ]
 }
