@@ -1,0 +1,432 @@
+{
+  "auditVersion": 1,
+  "basis": "tracked-repository-evidence-only",
+  "fixture": "fixtures/staging/synthetic-fixtures.json",
+  "scope": "test-plan-coverage",
+  "disclaimer": "This audit compares tracked dependencies with synthetic acceptance expectations. It does not prove production or staging behavior, configuration, authorization, or deployment state.",
+  "statuses": {
+    "covered": "A synthetic expectation directly exercises the dependency and documented test-plan dimension.",
+    "partial": "Expectations exercise only some operations, actors, resources, or an analogous path.",
+    "not-covered": "No synthetic expectation exercises the tracked dependency.",
+    "blocked-unknown-semantics": "No expectation is asserted because repository evidence does not establish required authorization or runtime semantics."
+  },
+  "dependencies": [
+    {
+      "id": "rpc:get_app_bootstrap",
+      "kind": "rpc",
+      "name": "get_app_bootstrap",
+      "evidence": "BACKEND_INVENTORY.md",
+      "semantics": "unknown",
+      "status": "blocked-unknown-semantics",
+      "fixtureExpectationIds": [],
+      "note": "Repository evidence does not establish authorization or runtime semantics."
+    },
+    {
+      "id": "rpc:create_household",
+      "kind": "rpc",
+      "name": "create_household",
+      "evidence": "BACKEND_INVENTORY.md",
+      "semantics": "unknown",
+      "status": "blocked-unknown-semantics",
+      "fixtureExpectationIds": [],
+      "note": "Repository evidence does not establish authorization or runtime semantics."
+    },
+    {
+      "id": "rpc:join_household",
+      "kind": "rpc",
+      "name": "join_household",
+      "evidence": "BACKEND_INVENTORY.md",
+      "semantics": "unknown",
+      "status": "blocked-unknown-semantics",
+      "fixtureExpectationIds": [],
+      "note": "Repository evidence does not establish authorization or runtime semantics."
+    },
+    {
+      "id": "rpc:remove_meal_plan_item",
+      "kind": "rpc",
+      "name": "remove_meal_plan_item",
+      "evidence": "BACKEND_INVENTORY.md",
+      "semantics": "unknown",
+      "status": "blocked-unknown-semantics",
+      "fixtureExpectationIds": [],
+      "note": "Repository evidence does not establish authorization or runtime semantics."
+    },
+    {
+      "id": "rpc:create_community_recipe",
+      "kind": "rpc",
+      "name": "create_community_recipe",
+      "evidence": "BACKEND_INVENTORY.md",
+      "semantics": "unknown",
+      "status": "blocked-unknown-semantics",
+      "fixtureExpectationIds": [],
+      "note": "Repository evidence does not establish authorization or runtime semantics."
+    },
+    {
+      "id": "rpc:moderate_community_recipe",
+      "kind": "rpc",
+      "name": "moderate_community_recipe",
+      "evidence": "BACKEND_INVENTORY.md",
+      "semantics": "unknown",
+      "status": "blocked-unknown-semantics",
+      "fixtureExpectationIds": [],
+      "note": "Repository evidence does not establish authorization or runtime semantics."
+    },
+    {
+      "id": "rpc:edit_pending_community_recipe",
+      "kind": "rpc",
+      "name": "edit_pending_community_recipe",
+      "evidence": "BACKEND_INVENTORY.md",
+      "semantics": "unknown",
+      "status": "blocked-unknown-semantics",
+      "fixtureExpectationIds": [],
+      "note": "Repository evidence does not establish authorization or runtime semantics."
+    },
+    {
+      "id": "rpc:update_my_display_name",
+      "kind": "rpc",
+      "name": "update_my_display_name",
+      "evidence": "BACKEND_INVENTORY.md",
+      "semantics": "unknown",
+      "status": "blocked-unknown-semantics",
+      "fixtureExpectationIds": [],
+      "note": "Repository evidence does not establish authorization or runtime semantics."
+    },
+    {
+      "id": "rpc:delete_my_account",
+      "kind": "rpc",
+      "name": "delete_my_account",
+      "evidence": "BACKEND_INVENTORY.md",
+      "semantics": "unknown",
+      "status": "blocked-unknown-semantics",
+      "fixtureExpectationIds": [],
+      "note": "Repository evidence does not establish authorization or runtime semantics."
+    },
+    {
+      "id": "rpc:export_my_data",
+      "kind": "rpc",
+      "name": "export_my_data",
+      "evidence": "BACKEND_INVENTORY.md",
+      "semantics": "unknown",
+      "status": "blocked-unknown-semantics",
+      "fixtureExpectationIds": [],
+      "note": "Repository evidence does not establish authorization or runtime semantics."
+    },
+    {
+      "id": "rpc:get_current_legal_versions",
+      "kind": "rpc",
+      "name": "get_current_legal_versions",
+      "evidence": "BACKEND_INVENTORY.md",
+      "semantics": "unknown",
+      "status": "blocked-unknown-semantics",
+      "fixtureExpectationIds": [],
+      "note": "Repository evidence does not establish authorization or runtime semantics."
+    },
+    {
+      "id": "rpc:recipe_management_access",
+      "kind": "rpc",
+      "name": "recipe_management_access",
+      "evidence": "scripts/recipe-management.sql",
+      "semantics": "documented",
+      "status": "not-covered",
+      "fixtureExpectationIds": [],
+      "note": "No synthetic acceptance expectation directly exercises this dependency."
+    },
+    {
+      "id": "rpc:can_manage_recipe",
+      "kind": "rpc",
+      "name": "can_manage_recipe",
+      "evidence": "scripts/recipe-management.sql",
+      "semantics": "documented",
+      "status": "not-covered",
+      "fixtureExpectationIds": [],
+      "note": "No synthetic acceptance expectation directly exercises this dependency."
+    },
+    {
+      "id": "rpc:save_recipe",
+      "kind": "rpc",
+      "name": "save_recipe",
+      "evidence": "scripts/recipe-management.sql",
+      "semantics": "documented",
+      "status": "not-covered",
+      "fixtureExpectationIds": [],
+      "note": "No synthetic acceptance expectation directly exercises this dependency."
+    },
+    {
+      "id": "rpc:set_recipe_photo",
+      "kind": "rpc",
+      "name": "set_recipe_photo",
+      "evidence": "scripts/recipe-management.sql",
+      "semantics": "documented",
+      "status": "not-covered",
+      "fixtureExpectationIds": [],
+      "note": "No synthetic acceptance expectation directly exercises this dependency."
+    },
+    {
+      "id": "rpc:delete_recipe",
+      "kind": "rpc",
+      "name": "delete_recipe",
+      "evidence": "scripts/recipe-management.sql",
+      "semantics": "documented",
+      "status": "not-covered",
+      "fixtureExpectationIds": [],
+      "note": "No synthetic acceptance expectation directly exercises this dependency."
+    },
+    {
+      "id": "rpc:restore_recipe",
+      "kind": "rpc",
+      "name": "restore_recipe",
+      "evidence": "scripts/recipe-management.sql",
+      "semantics": "documented",
+      "status": "not-covered",
+      "fixtureExpectationIds": [],
+      "note": "No synthetic acceptance expectation directly exercises this dependency."
+    },
+    {
+      "id": "api:GET:/api/catalog",
+      "kind": "http-api",
+      "name": "GET /api/catalog",
+      "evidence": "docs/API_CONTRACTS.md",
+      "semantics": "unknown",
+      "status": "blocked-unknown-semantics",
+      "fixtureExpectationIds": [],
+      "note": "A client contract is tracked, but handler source and authorization/runtime behavior are missing."
+    },
+    {
+      "id": "api:GET:/api/recipe",
+      "kind": "http-api",
+      "name": "GET /api/recipe",
+      "evidence": "docs/API_CONTRACTS.md",
+      "semantics": "unknown",
+      "status": "blocked-unknown-semantics",
+      "fixtureExpectationIds": [],
+      "note": "A client contract is tracked, but handler source and authorization/runtime behavior are missing."
+    },
+    {
+      "id": "api:POST:/api/ai-fridge",
+      "kind": "http-api",
+      "name": "POST /api/ai-fridge",
+      "evidence": "docs/API_CONTRACTS.md",
+      "semantics": "unknown",
+      "status": "blocked-unknown-semantics",
+      "fixtureExpectationIds": [],
+      "note": "A client contract is tracked, but handler source and authorization/runtime behavior are missing."
+    },
+    {
+      "id": "postgrest:recipes",
+      "kind": "postgrest",
+      "name": "public.recipes",
+      "evidence": "BACKEND_INVENTORY.md",
+      "semantics": "partial",
+      "status": "partial",
+      "fixtureExpectationIds": [
+        "syn-case-private-recipe-member-read",
+        "syn-case-public-recipe-outsider-read",
+        "syn-case-public-recipe-anonymous-read",
+        "syn-case-private-recipe-outsider-read",
+        "syn-case-private-recipe-anonymous-read"
+      ],
+      "note": "Read visibility is planned; direct fallback query shapes and mutations are not."
+    },
+    {
+      "id": "postgrest:recipe_ingredients",
+      "kind": "postgrest",
+      "name": "public.recipe_ingredients",
+      "evidence": "BACKEND_INVENTORY.md",
+      "semantics": "documented",
+      "status": "not-covered",
+      "fixtureExpectationIds": [],
+      "note": "No synthetic acceptance expectation directly exercises this dependency."
+    },
+    {
+      "id": "postgrest:recipe_steps",
+      "kind": "postgrest",
+      "name": "public.recipe_steps",
+      "evidence": "BACKEND_INVENTORY.md",
+      "semantics": "documented",
+      "status": "not-covered",
+      "fixtureExpectationIds": [],
+      "note": "No synthetic acceptance expectation directly exercises this dependency."
+    },
+    {
+      "id": "postgrest:recipe_categories",
+      "kind": "postgrest",
+      "name": "public.recipe_categories",
+      "evidence": "BACKEND_INVENTORY.md",
+      "semantics": "documented",
+      "status": "not-covered",
+      "fixtureExpectationIds": [],
+      "note": "No synthetic acceptance expectation directly exercises this dependency."
+    },
+    {
+      "id": "postgrest:recipe_subcategories",
+      "kind": "postgrest",
+      "name": "public.recipe_subcategories",
+      "evidence": "BACKEND_INVENTORY.md",
+      "semantics": "documented",
+      "status": "not-covered",
+      "fixtureExpectationIds": [],
+      "note": "No synthetic acceptance expectation directly exercises this dependency."
+    },
+    {
+      "id": "postgrest:meal_plan",
+      "kind": "postgrest",
+      "name": "public.meal_plan",
+      "evidence": "BACKEND_INVENTORY.md",
+      "semantics": "partial",
+      "status": "partial",
+      "fixtureExpectationIds": [
+        "syn-case-cross-meal-plan-read",
+        "syn-case-table-meal-plan-insert",
+        "syn-case-table-meal-plan-update",
+        "syn-case-table-meal-plan-delete"
+      ],
+      "note": "Cross-household read and direct-write denial are planned; same-household and actual write-path behavior are not."
+    },
+    {
+      "id": "postgrest:shopping_checks",
+      "kind": "postgrest",
+      "name": "public.shopping_checks",
+      "evidence": "BACKEND_INVENTORY.md",
+      "semantics": "partial",
+      "status": "partial",
+      "fixtureExpectationIds": [
+        "syn-case-cross-shopping-read",
+        "syn-case-table-shopping-insert",
+        "syn-case-table-shopping-update",
+        "syn-case-table-shopping-delete"
+      ],
+      "note": "Cross-household read and direct-write denial are planned; same-household and actual write-path behavior are not."
+    },
+    {
+      "id": "realtime:meal_plan",
+      "kind": "realtime",
+      "name": "public.meal_plan",
+      "evidence": "BACKEND_INVENTORY.md",
+      "semantics": "unknown",
+      "status": "blocked-unknown-semantics",
+      "fixtureExpectationIds": [],
+      "note": "No meal-plan Realtime expectation exists; publication and server authorization remain unknown."
+    },
+    {
+      "id": "realtime:shopping_checks",
+      "kind": "realtime",
+      "name": "public.shopping_checks",
+      "evidence": "BACKEND_INVENTORY.md",
+      "semantics": "unknown",
+      "status": "partial",
+      "fixtureExpectationIds": [
+        "syn-case-realtime-own-event",
+        "syn-case-realtime-cross-event",
+        "syn-case-realtime-maple-own-event",
+        "syn-case-realtime-orchid-cross-event"
+      ],
+      "note": "Same/cross-household delivery is represented, but publication and runtime authorization remain unknown."
+    },
+    {
+      "id": "storage:upload",
+      "kind": "storage",
+      "name": "upload",
+      "evidence": "BACKEND_INVENTORY.md",
+      "semantics": "partial",
+      "status": "partial",
+      "fixtureExpectationIds": [
+        "syn-case-storage-owner-upload",
+        "syn-case-storage-member-upload",
+        "syn-case-storage-outsider-upload"
+      ],
+      "note": "Generic actor expectations exist, but exact tracked object-key and authorization/runtime behavior is not fully modeled."
+    },
+    {
+      "id": "storage:read",
+      "kind": "storage",
+      "name": "read",
+      "evidence": "BACKEND_INVENTORY.md",
+      "semantics": "partial",
+      "status": "partial",
+      "fixtureExpectationIds": [
+        "syn-case-storage-owner-read",
+        "syn-case-storage-member-read",
+        "syn-case-storage-outsider-read"
+      ],
+      "note": "Generic expectations exist, but tracked SQL permits authenticated reads of non-deleted recipe photos rather than the fixture owner-only model."
+    },
+    {
+      "id": "storage:sign",
+      "kind": "storage",
+      "name": "sign",
+      "evidence": "BACKEND_INVENTORY.md",
+      "semantics": "partial",
+      "status": "partial",
+      "fixtureExpectationIds": [
+        "syn-case-storage-owner-sign",
+        "syn-case-storage-member-sign",
+        "syn-case-storage-outsider-sign"
+      ],
+      "note": "Generic actor expectations exist, but exact tracked object-key and authorization/runtime behavior is not fully modeled."
+    },
+    {
+      "id": "storage:delete",
+      "kind": "storage",
+      "name": "delete",
+      "evidence": "BACKEND_INVENTORY.md",
+      "semantics": "partial",
+      "status": "partial",
+      "fixtureExpectationIds": [
+        "syn-case-storage-owner-delete",
+        "syn-case-storage-member-delete",
+        "syn-case-storage-outsider-delete"
+      ],
+      "note": "Generic expectations exist, but tracked SQL also permits a recipe manager, which the fixtures do not represent."
+    },
+    {
+      "id": "auth:password-sign-in",
+      "kind": "auth",
+      "name": "Email/password sign-in",
+      "evidence": "BACKEND_INVENTORY.md",
+      "semantics": "unknown",
+      "status": "blocked-unknown-semantics",
+      "fixtureExpectationIds": [],
+      "note": "Repository evidence does not establish authorization or runtime semantics."
+    },
+    {
+      "id": "auth:sign-up",
+      "kind": "auth",
+      "name": "Sign-up",
+      "evidence": "BACKEND_INVENTORY.md",
+      "semantics": "unknown",
+      "status": "blocked-unknown-semantics",
+      "fixtureExpectationIds": [],
+      "note": "Repository evidence does not establish authorization or runtime semantics."
+    },
+    {
+      "id": "auth:refresh",
+      "kind": "auth",
+      "name": "Refresh",
+      "evidence": "BACKEND_INVENTORY.md",
+      "semantics": "unknown",
+      "status": "blocked-unknown-semantics",
+      "fixtureExpectationIds": [],
+      "note": "Repository evidence does not establish authorization or runtime semantics."
+    },
+    {
+      "id": "auth:update-password",
+      "kind": "auth",
+      "name": "Αλλαγή κωδικού",
+      "evidence": "BACKEND_INVENTORY.md",
+      "semantics": "unknown",
+      "status": "blocked-unknown-semantics",
+      "fixtureExpectationIds": [],
+      "note": "Repository evidence does not establish authorization or runtime semantics."
+    },
+    {
+      "id": "auth:local-logout",
+      "kind": "auth",
+      "name": "Logout",
+      "evidence": "BACKEND_INVENTORY.md",
+      "semantics": "documented",
+      "status": "not-covered",
+      "fixtureExpectationIds": [],
+      "note": "No expectation covers local session removal and Realtime shutdown."
+    }
+  ]
+}
