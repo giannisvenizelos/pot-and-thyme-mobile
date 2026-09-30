@@ -127,9 +127,15 @@
       "name": "recipe_management_access",
       "evidence": "scripts/recipe-management.sql",
       "semantics": "documented",
-      "status": "not-covered",
-      "fixtureExpectationIds": [],
-      "note": "No synthetic acceptance expectation directly exercises this dependency."
+      "status": "covered",
+      "fixtureExpectationIds": [
+        "syn-rm-access-owner-true",
+        "syn-rm-access-unrelated-false",
+        "syn-rm-access-anonymous-denied"
+      ],
+      "note": "Covered by repository-only synthetic expectations derived from historical SQL; not verified against production or staging.",
+      "coverageProvenance": "historical-source-derived-expectation",
+      "productionVerified": false
     },
     {
       "id": "rpc:can_manage_recipe",
@@ -137,9 +143,17 @@
       "name": "can_manage_recipe",
       "evidence": "scripts/recipe-management.sql",
       "semantics": "documented",
-      "status": "not-covered",
-      "fixtureExpectationIds": [],
-      "note": "No synthetic acceptance expectation directly exercises this dependency."
+      "status": "covered",
+      "fixtureExpectationIds": [
+        "syn-rm-can-manage-owner-curated",
+        "syn-rm-can-manage-creator-community",
+        "syn-rm-can-manage-unrelated-false",
+        "syn-rm-can-manage-deleted-false",
+        "syn-rm-can-manage-anonymous-denied"
+      ],
+      "note": "Covered by repository-only synthetic expectations derived from historical SQL; not verified against production or staging.",
+      "coverageProvenance": "historical-source-derived-expectation",
+      "productionVerified": false
     },
     {
       "id": "rpc:save_recipe",
@@ -147,9 +161,17 @@
       "name": "save_recipe",
       "evidence": "scripts/recipe-management.sql",
       "semantics": "documented",
-      "status": "not-covered",
-      "fixtureExpectationIds": [],
-      "note": "No synthetic acceptance expectation directly exercises this dependency."
+      "status": "covered",
+      "fixtureExpectationIds": [
+        "syn-rm-save-owner-create",
+        "syn-rm-save-creator-create",
+        "syn-rm-save-creator-update",
+        "syn-rm-save-unrelated-update-denied",
+        "syn-rm-save-anonymous-denied"
+      ],
+      "note": "Covered by repository-only synthetic expectations derived from historical SQL; not verified against production or staging.",
+      "coverageProvenance": "historical-source-derived-expectation",
+      "productionVerified": false
     },
     {
       "id": "rpc:set_recipe_photo",
@@ -157,9 +179,17 @@
       "name": "set_recipe_photo",
       "evidence": "scripts/recipe-management.sql",
       "semantics": "documented",
-      "status": "not-covered",
-      "fixtureExpectationIds": [],
-      "note": "No synthetic acceptance expectation directly exercises this dependency."
+      "status": "covered",
+      "fixtureExpectationIds": [
+        "syn-rm-photo-creator-set",
+        "syn-rm-photo-owner-clear",
+        "syn-rm-photo-unrelated-denied",
+        "syn-rm-photo-wrong-path-denied",
+        "syn-rm-photo-anonymous-denied"
+      ],
+      "note": "Covered by repository-only synthetic expectations derived from historical SQL; not verified against production or staging.",
+      "coverageProvenance": "historical-source-derived-expectation",
+      "productionVerified": false
     },
     {
       "id": "rpc:delete_recipe",
@@ -167,9 +197,16 @@
       "name": "delete_recipe",
       "evidence": "scripts/recipe-management.sql",
       "semantics": "documented",
-      "status": "not-covered",
-      "fixtureExpectationIds": [],
-      "note": "No synthetic acceptance expectation directly exercises this dependency."
+      "status": "covered",
+      "fixtureExpectationIds": [
+        "syn-rm-delete-owner-curated",
+        "syn-rm-delete-creator-community",
+        "syn-rm-delete-unrelated-denied",
+        "syn-rm-delete-anonymous-denied"
+      ],
+      "note": "Covered by repository-only synthetic expectations derived from historical SQL; not verified against production or staging.",
+      "coverageProvenance": "historical-source-derived-expectation",
+      "productionVerified": false
     },
     {
       "id": "rpc:restore_recipe",
@@ -177,9 +214,16 @@
       "name": "restore_recipe",
       "evidence": "scripts/recipe-management.sql",
       "semantics": "documented",
-      "status": "not-covered",
-      "fixtureExpectationIds": [],
-      "note": "No synthetic acceptance expectation directly exercises this dependency."
+      "status": "covered",
+      "fixtureExpectationIds": [
+        "syn-rm-restore-owner-community",
+        "syn-rm-restore-creator-community",
+        "syn-rm-restore-unrelated-denied",
+        "syn-rm-restore-anonymous-denied"
+      ],
+      "note": "Covered by repository-only synthetic expectations derived from historical SQL; not verified against production or staging.",
+      "coverageProvenance": "historical-source-derived-expectation",
+      "productionVerified": false
     },
     {
       "id": "api:GET:/api/catalog",

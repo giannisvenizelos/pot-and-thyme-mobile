@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 
 const audit = JSON.parse(await readFile('fixtures/staging/synthetic-coverage-audit.json', 'utf8'));
 const fixture = JSON.parse(await readFile(audit.fixture, 'utf8'));
+const recipeManagementFixture = JSON.parse(await readFile('fixtures/staging/recipe-management-expectations.json', 'utf8'));
 const requiredDependencyIds = [
   'rpc:get_app_bootstrap', 'rpc:create_household', 'rpc:join_household', 'rpc:remove_meal_plan_item',
   'rpc:create_community_recipe', 'rpc:moderate_community_recipe', 'rpc:edit_pending_community_recipe',
@@ -17,7 +18,10 @@ const requiredDependencyIds = [
   'auth:password-sign-in', 'auth:sign-up', 'auth:refresh', 'auth:update-password', 'auth:local-logout'
 ].sort();
 const statuses = new Set(['covered', 'partial', 'not-covered', 'blocked-unknown-semantics']);
-const fixtureCases = new Set(fixture.cases.map(testCase => testCase.id));
+const fixtureCases = new Set([
+  ...fixture.cases.map(testCase => testCase.id),
+  ...recipeManagementFixture.expectations.map(expectation => expectation.id)
+]);
 
 assert.equal(audit.basis, 'tracked-repository-evidence-only');
 assert.equal(audit.scope, 'test-plan-coverage');
@@ -39,6 +43,13 @@ for (const dependency of audit.dependencies) {
   assert(evidenceCache.get(dependency.evidence).toLowerCase().includes(evidenceNeedle.toLowerCase()), `${dependency.id} is absent from its claimed evidence.`);
   for (const caseId of dependency.fixtureExpectationIds) assert(fixtureCases.has(caseId), `${dependency.id} references missing fixture expectation ${caseId}.`);
   if (dependency.status === 'covered') assert(dependency.fixtureExpectationIds.length > 0, `${dependency.id} is falsely fully covered without an expectation.`);
+  if (dependency.evidence === 'scripts/recipe-management.sql') {
+    assert.equal(dependency.coverageProvenance, 'historical-source-derived-expectation', `${dependency.id} lacks historical provenance.`);
+    assert.equal(dependency.productionVerified, false, `${dependency.id} must not claim production verification.`);
+    for (const caseId of dependency.fixtureExpectationIds) {
+      assert(recipeManagementFixture.expectations.some(item => item.id === caseId && item.rpc === dependency.name), `${dependency.id} links an expectation from the wrong RPC.`);
+    }
+  }
   if (dependency.semantics === 'unknown') assert.notEqual(dependency.status, 'covered', `${dependency.id} has unknown semantics and cannot be fully covered.`);
   if (['not-covered', 'blocked-unknown-semantics'].includes(dependency.status)) assert.equal(dependency.fixtureExpectationIds.length, 0, `${dependency.id} claims no coverage but links expectations.`);
 }

@@ -1,0 +1,56 @@
+{
+  "fixtureSet": "synthetic-recipe-management-v1",
+  "syntheticOnly": true,
+  "evidence": {
+    "path": "scripts/recipe-management.sql",
+    "classification": "historical-repository-evidence",
+    "productionVerified": false,
+    "disclaimer": "These fictional expectations are derived only from historical SQL tracked in this repository. They do not assert current production or staging behavior."
+  },
+  "actors": [
+    { "id": "syn-rm-owner", "role": "recipe-management-owner", "authenticated": true },
+    { "id": "syn-rm-creator", "role": "community-recipe-creator", "authenticated": true },
+    { "id": "syn-rm-unrelated", "role": "unrelated-authenticated-user", "authenticated": true },
+    { "id": "anonymous", "role": "anonymous", "authenticated": false }
+  ],
+  "resources": [
+    { "id": "syn-rm-curated-live", "type": "recipe", "origin": "curated", "creatorRef": "syn-rm-owner", "deleted": false },
+    { "id": "syn-rm-community-live", "type": "recipe", "origin": "community", "creatorRef": "syn-rm-creator", "deleted": false },
+    { "id": "syn-rm-community-deleted", "type": "recipe", "origin": "community", "creatorRef": "syn-rm-creator", "deleted": true },
+    { "id": "syn-rm-photo-valid", "type": "storage-object", "ownerRef": "syn-rm-creator", "recipeRef": "syn-rm-community-live", "pathShape": "actor-uid/recipe-id/file.jpg", "exists": true },
+    { "id": "syn-rm-photo-wrong-owner", "type": "storage-object", "ownerRef": "syn-rm-unrelated", "recipeRef": "syn-rm-community-live", "pathShape": "other-uid/recipe-id/file.jpg", "exists": true }
+  ],
+  "expectations": [
+    { "id": "syn-rm-access-owner-true", "rpc": "recipe_management_access", "actorRef": "syn-rm-owner", "resourceRef": null, "expect": "return-true" },
+    { "id": "syn-rm-access-unrelated-false", "rpc": "recipe_management_access", "actorRef": "syn-rm-unrelated", "resourceRef": null, "expect": "return-false" },
+    { "id": "syn-rm-access-anonymous-denied", "rpc": "recipe_management_access", "actorRef": "anonymous", "resourceRef": null, "expect": "execute-denied" },
+
+    { "id": "syn-rm-can-manage-owner-curated", "rpc": "can_manage_recipe", "actorRef": "syn-rm-owner", "resourceRef": "syn-rm-curated-live", "expect": "return-true" },
+    { "id": "syn-rm-can-manage-creator-community", "rpc": "can_manage_recipe", "actorRef": "syn-rm-creator", "resourceRef": "syn-rm-community-live", "expect": "return-true" },
+    { "id": "syn-rm-can-manage-unrelated-false", "rpc": "can_manage_recipe", "actorRef": "syn-rm-unrelated", "resourceRef": "syn-rm-community-live", "expect": "return-false" },
+    { "id": "syn-rm-can-manage-deleted-false", "rpc": "can_manage_recipe", "actorRef": "syn-rm-creator", "resourceRef": "syn-rm-community-deleted", "expect": "return-false" },
+    { "id": "syn-rm-can-manage-anonymous-denied", "rpc": "can_manage_recipe", "actorRef": "anonymous", "resourceRef": "syn-rm-community-live", "expect": "execute-denied" },
+
+    { "id": "syn-rm-save-owner-create", "rpc": "save_recipe", "actorRef": "syn-rm-owner", "resourceRef": null, "operation": "create-valid", "expect": "allow", "effects": { "origin": "curated", "moderationStatus": "approved", "published": true } },
+    { "id": "syn-rm-save-creator-create", "rpc": "save_recipe", "actorRef": "syn-rm-creator", "resourceRef": null, "operation": "create-valid", "expect": "allow", "effects": { "origin": "community", "moderationStatus": "pending", "published": false } },
+    { "id": "syn-rm-save-creator-update", "rpc": "save_recipe", "actorRef": "syn-rm-creator", "resourceRef": "syn-rm-community-live", "operation": "update-valid", "expect": "allow", "effects": { "moderationStatus": "pending", "moderationCleared": true, "published": false } },
+    { "id": "syn-rm-save-unrelated-update-denied", "rpc": "save_recipe", "actorRef": "syn-rm-unrelated", "resourceRef": "syn-rm-community-live", "operation": "update-valid", "expect": "authorization-error" },
+    { "id": "syn-rm-save-anonymous-denied", "rpc": "save_recipe", "actorRef": "anonymous", "resourceRef": null, "operation": "create-valid", "expect": "execute-denied" },
+
+    { "id": "syn-rm-photo-creator-set", "rpc": "set_recipe_photo", "actorRef": "syn-rm-creator", "resourceRef": "syn-rm-community-live", "objectRef": "syn-rm-photo-valid", "expect": "allow", "effects": { "moderationStatus": "pending", "moderationCleared": true, "published": false } },
+    { "id": "syn-rm-photo-owner-clear", "rpc": "set_recipe_photo", "actorRef": "syn-rm-owner", "resourceRef": "syn-rm-curated-live", "objectRef": null, "expect": "allow", "effects": { "photoUrl": null } },
+    { "id": "syn-rm-photo-unrelated-denied", "rpc": "set_recipe_photo", "actorRef": "syn-rm-unrelated", "resourceRef": "syn-rm-community-live", "objectRef": "syn-rm-photo-wrong-owner", "expect": "authorization-error" },
+    { "id": "syn-rm-photo-wrong-path-denied", "rpc": "set_recipe_photo", "actorRef": "syn-rm-creator", "resourceRef": "syn-rm-community-live", "objectRef": "syn-rm-photo-wrong-owner", "expect": "path-validation-error" },
+    { "id": "syn-rm-photo-anonymous-denied", "rpc": "set_recipe_photo", "actorRef": "anonymous", "resourceRef": "syn-rm-community-live", "objectRef": null, "expect": "execute-denied" },
+
+    { "id": "syn-rm-delete-owner-curated", "rpc": "delete_recipe", "actorRef": "syn-rm-owner", "resourceRef": "syn-rm-curated-live", "expect": "allow", "effects": { "deleted": true } },
+    { "id": "syn-rm-delete-creator-community", "rpc": "delete_recipe", "actorRef": "syn-rm-creator", "resourceRef": "syn-rm-community-live", "expect": "allow", "effects": { "deleted": true } },
+    { "id": "syn-rm-delete-unrelated-denied", "rpc": "delete_recipe", "actorRef": "syn-rm-unrelated", "resourceRef": "syn-rm-community-live", "expect": "authorization-error" },
+    { "id": "syn-rm-delete-anonymous-denied", "rpc": "delete_recipe", "actorRef": "anonymous", "resourceRef": "syn-rm-community-live", "expect": "execute-denied" },
+
+    { "id": "syn-rm-restore-owner-community", "rpc": "restore_recipe", "actorRef": "syn-rm-owner", "resourceRef": "syn-rm-community-deleted", "expect": "allow", "effects": { "deleted": false } },
+    { "id": "syn-rm-restore-creator-community", "rpc": "restore_recipe", "actorRef": "syn-rm-creator", "resourceRef": "syn-rm-community-deleted", "expect": "allow", "effects": { "deleted": false } },
+    { "id": "syn-rm-restore-unrelated-denied", "rpc": "restore_recipe", "actorRef": "syn-rm-unrelated", "resourceRef": "syn-rm-community-deleted", "expect": "authorization-error" },
+    { "id": "syn-rm-restore-anonymous-denied", "rpc": "restore_recipe", "actorRef": "anonymous", "resourceRef": "syn-rm-community-deleted", "expect": "execute-denied" }
+  ]
+}

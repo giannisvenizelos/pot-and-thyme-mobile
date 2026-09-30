@@ -10,7 +10,7 @@
     "dev": "npm run build && serve apps/mobile/public -l 3000",
     "test:ui": "node scripts/verify-recipe-ui.mjs && node scripts/verify-editor-integration.mjs mobile",
     "test:contracts": "node scripts/verify-api-contracts.mjs",
-    "test:fixtures": "node scripts/verify-synthetic-staging-fixtures.mjs",
+    "test:fixtures": "node scripts/verify-synthetic-staging-fixtures.mjs && node scripts/verify-recipe-management-expectations.mjs",
     "test:coverage-audit": "node scripts/verify-synthetic-coverage-audit.mjs",
     "test:integration:staging": "node scripts/test-staging-api.mjs",
     "test:schema-recovery": "bash -n scripts/export-supabase-schema.sh scripts/verify-staging-migrations.sh && node scripts/verify-schema-recovery.mjs && node scripts/verify-staging-preparation.mjs",
