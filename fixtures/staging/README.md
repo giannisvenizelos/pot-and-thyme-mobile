@@ -31,7 +31,8 @@ confirm every authorization expectation before any isolated-staging execution.
 ## Acceptance scenarios
 
 The `cases` array is executable documentation for a future authorization harness. `allow` cases
-cover same-household access and public-recipe discovery. `deny` cases require cross-household
-meal-plan/shopping isolation and denial of household-only recipes to outsiders and anonymous
-actors. The offline verifier currently checks only fixture safety and logical consistency; it does
-not claim that any missing server or database implementation enforces these expectations.
+cover same-household access, same-household private-recipe reads, and public-recipe discovery.
+`deny` cases require cross-household meal-plan/shopping isolation and denial of household-only
+recipes to outsiders and anonymous actors. The offline verifier currently checks only fixture
+safety and logical consistency; it does not claim that any missing server or database
+implementation enforces these expectations.

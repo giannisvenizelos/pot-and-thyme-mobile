@@ -24,6 +24,12 @@ const households = new Set(fixture.households.map(item => item.id));
 const users = new Map(fixture.users.map(item => [item.id, item]));
 const recipes = new Map(fixture.recipes.map(item => [item.id, item]));
 
+assert.equal(
+  new Set(fixture.users.map(user => user.email)).size,
+  fixture.users.length,
+  'Synthetic user emails must be unique.'
+);
+
 for (const user of fixture.users) {
   assert.match(user.email, /^[a-z0-9.]+@example\.invalid$/);
   assert(households.has(user.householdRef), `${user.id} references an unknown household.`);
@@ -59,10 +65,13 @@ for (const testCase of fixture.cases.filter(item => item.reason === 'cross-house
   assert.equal(testCase.expect, 'deny');
 }
 for (const testCase of fixture.cases.filter(item => item.resourceType === 'recipe')) {
-  const visibility = recipes.get(testCase.resourceRef).visibility;
-  assert.equal(testCase.expect, visibility === 'public' ? 'allow' : 'deny', `${testCase.id} contradicts recipe visibility.`);
+  const recipe = recipes.get(testCase.resourceRef);
+  const actor = users.get(testCase.actorRef);
+  const expected = recipe.visibility === 'public' || actor?.householdRef === recipe.householdRef ? 'allow' : 'deny';
+  assert.equal(testCase.expect, expected, `${testCase.id} contradicts recipe visibility.`);
 }
 assert(fixture.cases.some(item => item.expect === 'allow' && item.reason === 'public recipe visibility'));
+assert(fixture.cases.some(item => item.expect === 'allow' && item.reason === 'same-household recipe visibility'));
 assert(fixture.cases.some(item => item.expect === 'deny' && item.reason === 'household-only recipe visibility'));
 assert(fixture.cases.some(item => item.expect === 'deny' && item.reason === 'cross-household isolation'));
 
