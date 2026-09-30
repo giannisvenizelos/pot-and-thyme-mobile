@@ -7,6 +7,13 @@ migration, a seed script, or authorization to connect to any Supabase project. E
 email, household, recipe, identifier, object path, filename, plan entry, and shopping item is
 fictional and deterministic.
 
+`synthetic-coverage-audit.json` is the repository-only inventory and gap report for
+client-facing RPC, HTTP API, direct PostgREST, Realtime, Storage, and Auth dependencies.
+Its classifications measure **test-plan coverage only** and do not prove production or
+staging behavior, configuration, authorization, or deployment state. A blocked entry means
+that the repository does not establish enough authorization or runtime semantics to invent
+an allow/deny expectation safely.
+
 `synthetic-fixtures.json` reuses a single `cases` model for table, RPC, Realtime, and Storage
 expectations. Logical names such as `householdRef`, `ownerRef`, `resourceRef`, and `pathRef`
 express test relationships, not discovered database columns, RPC parameters, channels, buckets,
@@ -19,6 +26,9 @@ key type.
 The fixture and verifier must remain offline and repository-only. Running `npm run test:fixtures`
 reads local JSON and contract files; it has no remote adapter and must not be given credentials.
 It checks the acceptance model's internal consistency, not a deployed system's behavior.
+`npm run test:coverage-audit` likewise reads only tracked local evidence. It verifies the
+closed dependency inventory, fixture-case links, and the rule that unknown semantics cannot
+be marked fully covered.
 
 The following work remains **BLOCKED pending the future reviewed schema and its mandatory
 two-person approval**:
