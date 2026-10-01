@@ -5,6 +5,9 @@
   "environment": "offline",
   "productionVerified": false,
   "prohibitedClaims": ["server-authorization", "anonymous-permission", "authenticated-permission", "server-token-revocation"],
+  "households": [
+    { "id": "repo-household-thyme" }
+  ],
   "recipes": [
     {
       "id": "repo-recipe-soup",
@@ -28,10 +31,17 @@
     { "id": "repo-subcategory-toast", "categoryRef": "repo-category-breakfast", "name": "Fictional Toast", "display_order": 1 }
   ],
   "expectations": [
+    { "id": "repo-recipes-catalog-fallback-query", "dependency": "postgrest:recipes", "behavior": "direct-fallback-read", "resourcePath": "/rest/v1/recipes", "select": ["id", "title", "meal", "subcategory", "prep_minutes", "cook_minutes", "created_at", "created_by", "recipe_origin", "moderation_status", "photo_url"], "filters": { "meal": "eq.<canonical meal>", "subcategory": "eq.<subcategory>", "title": "ilike.*<sanitized search>*" }, "pagination": { "limitField": "limit", "cursorField": "id", "cursorOperator": "gt" }, "order": { "field": "created_at", "direction": "desc" } },
+    { "id": "repo-recipes-detail-fallback-query", "dependency": "postgrest:recipes", "behavior": "direct-fallback-embedded-read", "resourcePath": "/rest/v1/recipes", "select": ["*", "recipe_ingredients(*)", "recipe_steps(*)"], "filters": { "id": "eq.<recipe id>" }, "limit": 1, "embeddedClientOrder": { "recipe_ingredients": { "field": "position", "direction": "asc" }, "recipe_steps": { "field": "position", "direction": "asc" } } },
     { "id": "repo-detail-ingredients-embedded-position-order", "dependency": "postgrest:recipe_ingredients", "behavior": "embedded-read", "recipeRef": "repo-recipe-soup", "relationship": "recipe_ingredients", "orderBy": "position", "direction": "asc", "expectedRefs": ["repo-ingredient-lentils", "repo-ingredient-carrot"] },
     { "id": "repo-detail-steps-embedded-position-order", "dependency": "postgrest:recipe_steps", "behavior": "embedded-read", "recipeRef": "repo-recipe-soup", "relationship": "recipe_steps", "orderBy": "position", "direction": "asc", "expectedRefs": ["repo-step-rinse", "repo-step-simmer"] },
     { "id": "repo-taxonomy-categories-display-order", "dependency": "postgrest:recipe_categories", "behavior": "taxonomy-read", "orderBy": "display_order", "direction": "asc", "expectedRefs": ["repo-category-breakfast", "repo-category-dinner"] },
     { "id": "repo-taxonomy-subcategories-reference-and-order", "dependency": "postgrest:recipe_subcategories", "behavior": "taxonomy-read", "parentRefField": "categoryRef", "orderBy": "display_order", "direction": "asc", "expectedRefsByCategory": { "repo-category-breakfast": ["repo-subcategory-toast"], "repo-category-dinner": ["repo-subcategory-soup", "repo-subcategory-stew"] } },
+    { "id": "repo-meal-plan-bootstrap-read", "dependency": "postgrest:meal_plan", "behavior": "same-household-client-read", "householdRef": "repo-household-thyme", "trackedSource": "get_app_bootstrap response", "responseField": "plan" },
+    { "id": "repo-meal-plan-date-update", "dependency": "postgrest:meal_plan", "behavior": "same-household-client-update", "householdRef": "repo-household-thyme", "method": "PATCH", "resourcePath": "/rest/v1/meal_plan", "filters": { "id": "eq.<meal plan id>" }, "bodyFields": ["plan_date"], "prefer": "return=minimal" },
+    { "id": "repo-meal-plan-servings-update", "dependency": "postgrest:meal_plan", "behavior": "same-household-client-update", "householdRef": "repo-household-thyme", "method": "PATCH", "resourcePath": "/rest/v1/meal_plan", "filters": { "id": "eq.<meal plan id>" }, "bodyFields": ["servings"], "prefer": "return=minimal" },
+    { "id": "repo-shopping-checks-bootstrap-read", "dependency": "postgrest:shopping_checks", "behavior": "same-household-client-read", "householdRef": "repo-household-thyme", "trackedSource": "get_app_bootstrap response", "responseField": "shopping" },
+    { "id": "repo-shopping-checks-upsert", "dependency": "postgrest:shopping_checks", "behavior": "same-household-client-upsert", "householdRef": "repo-household-thyme", "method": "POST", "resourcePath": "/rest/v1/shopping_checks", "onConflict": ["household_id", "item_key"], "bodyFields": ["household_id", "item_key", "checked", "updated_by"], "prefer": "resolution=merge-duplicates,return=minimal" },
     { "id": "repo-auth-local-logout-effects", "dependency": "auth:local-logout", "behavior": "client-local-logout", "removesSessionFromMemory": true, "removedStorageKeys": ["pot_session_v4", "pot_session_v3"], "closesRealtimeConnection": true, "clearsRealtimeHandle": true, "clearsRealtimeHeartbeat": true, "serverTokenRevocation": "not-claimed" }
   ]
 }

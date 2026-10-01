@@ -26,6 +26,11 @@ const fixtureCases = new Set([
 ]);
 
 const repositoryDependencyIds = new Set([
+  'postgrest:recipes', 'postgrest:recipe_ingredients', 'postgrest:recipe_steps',
+  'postgrest:recipe_categories', 'postgrest:recipe_subcategories', 'postgrest:meal_plan',
+  'postgrest:shopping_checks', 'auth:local-logout'
+]);
+const fullyCoveredRepositoryDependencyIds = new Set([
   'postgrest:recipe_ingredients', 'postgrest:recipe_steps', 'postgrest:recipe_categories',
   'postgrest:recipe_subcategories', 'auth:local-logout'
 ]);
@@ -42,12 +47,18 @@ const recipeIds = new Set(repositoryFixture.recipes.map(recipe => recipe.id));
 const categories = new Map(repositoryFixture.categories.map(category => [category.id, category]));
 const subcategories = new Map(repositoryFixture.subcategories.map(subcategory => [subcategory.id, subcategory]));
 const forbiddenClaimFields = new Set(['actorRef', 'expect', 'authorization', 'permission', 'tokenRevoked', 'revokesToken']);
+function assertNoServerClaimFields(value, expectationId) {
+  if (!value || typeof value !== 'object') return;
+  for (const [field, nested] of Object.entries(value)) {
+    assert(!forbiddenClaimFields.has(field), `${expectationId} accidentally claims server authorization or revocation via ${field}.`);
+    assertNoServerClaimFields(nested, expectationId);
+  }
+}
 
 for (const expectation of repositoryFixture.expectations) {
   assert(repositoryDependencyIds.has(expectation.dependency), `${expectation.id} covers an out-of-scope dependency.`);
-  for (const field of Object.keys(expectation)) {
-    assert(!forbiddenClaimFields.has(field), `${expectation.id} accidentally claims server authorization or revocation via ${field}.`);
-  }
+  assertNoServerClaimFields(expectation, expectation.id);
+  assert(!/\b(?:allow|deny|denied|authorized|authorization|rls|policy enforced)\b/i.test(JSON.stringify(expectation)), `${expectation.id} accidentally claims server authorization behavior.`);
 }
 assert.deepEqual(new Set(repositoryFixture.expectations.map(item => item.dependency)), repositoryDependencyIds, 'Repository expectations must cover every scoped dependency exactly by dependency.');
 
@@ -77,6 +88,57 @@ for (const [categoryRef, expectedRefs] of Object.entries(subcategoryExpectation.
   assert.deepEqual([...subcategories.values()].filter(row => row.categoryRef === categoryRef).sort((a, b) => a.display_order - b.display_order).map(row => row.id), expectedRefs);
 }
 
+const clientAppSource = await readFile('shared/app1.js', 'utf8');
+const clientHouseholdSource = await readFile('shared/app2.js', 'utf8');
+const catalogFallback = repositoryExpectations.get('repo-recipes-catalog-fallback-query');
+assert.equal(catalogFallback.resourcePath, '/rest/v1/recipes');
+assert.deepEqual(catalogFallback.select, ['id', 'title', 'meal', 'subcategory', 'prep_minutes', 'cook_minutes', 'created_at', 'created_by', 'recipe_origin', 'moderation_status', 'photo_url']);
+assert.deepEqual(catalogFallback.filters, {meal: 'eq.<canonical meal>', subcategory: 'eq.<subcategory>', title: 'ilike.*<sanitized search>*'});
+assert.deepEqual(catalogFallback.pagination, {limitField: 'limit', cursorField: 'id', cursorOperator: 'gt'});
+assert.deepEqual(catalogFallback.order, {field: 'created_at', direction: 'desc'});
+for (const fragment of [
+  "select:'id,title,meal,subcategory,prep_minutes,cook_minutes,created_at,created_by,recipe_origin,moderation_status,photo_url'",
+  "order:'created_at.desc'", "q.set('meal','eq.'+canonicalMeal(S.tab))", "q.set('subcategory','eq.'+S.cat)",
+  "q.set('title','ilike.*'+S.search.trim().replace(/[,*()]/g,' ')+'*')", "q.set('id','gt.'+S.cursor)"
+]) assert(clientAppSource.includes(fragment), `Catalog fallback query shape is stale: ${fragment}`);
+
+const detailFallback = repositoryExpectations.get('repo-recipes-detail-fallback-query');
+assert.deepEqual(detailFallback.select, ['*', 'recipe_ingredients(*)', 'recipe_steps(*)']);
+assert.deepEqual(detailFallback.filters, {id: 'eq.<recipe id>'});
+assert.equal(detailFallback.limit, 1);
+for (const relationship of ['recipe_ingredients', 'recipe_steps']) {
+  assert.deepEqual(detailFallback.embeddedClientOrder[relationship], {field: 'position', direction: 'asc'});
+  assert(clientAppSource.includes(`${relationship}?.sort((a,b)=>a.position-b.position)`), `Embedded ${relationship} ordering is stale.`);
+}
+assert(clientAppSource.includes("api('/rest/v1/recipes?select=*,recipe_ingredients(*),recipe_steps(*)&id=eq.'+id+'&limit=1')"), 'Recipe detail fallback query shape is stale.');
+
+const householdIds = new Set(repositoryFixture.households.map(household => household.id));
+for (const expectation of repositoryFixture.expectations.filter(item => item.householdRef)) {
+  assert(householdIds.has(expectation.householdRef), `${expectation.id} has a broken household reference.`);
+}
+for (const [id, responseField] of [['repo-meal-plan-bootstrap-read', 'plan'], ['repo-shopping-checks-bootstrap-read', 'shopping']]) {
+  const expectation = repositoryExpectations.get(id);
+  assert.equal(expectation.responseField, responseField);
+  assert(clientHouseholdSource.includes(`S.${responseField}=b.${responseField}||[]`), `${id} has a stale bootstrap response field.`);
+}
+for (const [id, bodyField, sourceFragment] of [
+  ['repo-meal-plan-date-update', 'plan_date', "api('/rest/v1/meal_plan?id=eq.'+encodeURIComponent(id),{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({plan_date:newDate})})"],
+  ['repo-meal-plan-servings-update', 'servings', "api('/rest/v1/meal_plan?id=eq.'+id,{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({servings:Math.max(.5,n)})})"]
+]) {
+  const expectation = repositoryExpectations.get(id);
+  assert.equal(expectation.method, 'PATCH');
+  assert.deepEqual(expectation.filters, {id: 'eq.<meal plan id>'});
+  assert.deepEqual(expectation.bodyFields, [bodyField]);
+  assert.equal(expectation.prefer, 'return=minimal');
+  assert(clientHouseholdSource.includes(sourceFragment), `${id} request shape is stale.`);
+}
+const shoppingUpsert = repositoryExpectations.get('repo-shopping-checks-upsert');
+assert.equal(shoppingUpsert.method, 'POST');
+assert.deepEqual(shoppingUpsert.onConflict, ['household_id', 'item_key']);
+assert.deepEqual(shoppingUpsert.bodyFields, ['household_id', 'item_key', 'checked', 'updated_by']);
+assert.equal(shoppingUpsert.prefer, 'resolution=merge-duplicates,return=minimal');
+assert(clientHouseholdSource.includes("api('/rest/v1/shopping_checks?on_conflict=household_id,item_key',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({household_id:S.house.id,item_key:k,checked:v,updated_by:S.session.user.id})})"), 'Shopping check upsert query shape is stale.');
+
 const logout = repositoryExpectations.get('repo-auth-local-logout-effects');
 assert.equal(logout.removesSessionFromMemory, true);
 assert.deepEqual(logout.removedStorageKeys, ['pot_session_v4', 'pot_session_v3']);
@@ -84,8 +146,8 @@ assert.equal(logout.closesRealtimeConnection, true);
 assert.equal(logout.clearsRealtimeHandle, true);
 assert.equal(logout.clearsRealtimeHeartbeat, true);
 assert.equal(logout.serverTokenRevocation, 'not-claimed');
-const clientSessionSource = await readFile('shared/app1.js', 'utf8');
-const clientRealtimeSource = await readFile('shared/app2.js', 'utf8');
+const clientSessionSource = clientAppSource;
+const clientRealtimeSource = clientHouseholdSource;
 const clientLogoutSource = await readFile('apps/mobile/mobile.js', 'utf8');
 for (const key of logout.removedStorageKeys) assert(clientSessionSource.includes(`localStorage.removeItem('${key}')`), `Logout key ${key} is not supported by tracked client code.`);
 assert(clientSessionSource.includes('S.session=x'), 'Tracked client no longer clears its in-memory session through saveSession.');
@@ -121,12 +183,12 @@ for (const dependency of audit.dependencies) {
     }
   }
   if (repositoryDependencyIds.has(dependency.id)) {
-    assert.equal(dependency.status, 'covered', `${dependency.id} must link its repository-only expectation.`);
+    assert.equal(dependency.status, fullyCoveredRepositoryDependencyIds.has(dependency.id) ? 'covered' : 'partial', `${dependency.id} has unsupported repository-only coverage status.`);
     assert.equal(dependency.coverageProvenance, 'tracked-client-derived-expectation', `${dependency.id} lacks client-derived provenance.`);
     assert.equal(dependency.productionVerified, false, `${dependency.id} must not claim production verification.`);
-    for (const caseId of dependency.fixtureExpectationIds) {
-      assert.equal(repositoryExpectations.get(caseId)?.dependency, dependency.id, `${dependency.id} links an expectation for a different dependency.`);
-    }
+    const linkedRepositoryExpectations = dependency.fixtureExpectationIds.filter(caseId => repositoryExpectations.has(caseId));
+    assert(linkedRepositoryExpectations.length > 0, `${dependency.id} must link its repository-only expectation.`);
+    for (const caseId of linkedRepositoryExpectations) assert.equal(repositoryExpectations.get(caseId).dependency, dependency.id, `${dependency.id} links an expectation for a different dependency.`);
   }
   if (dependency.semantics === 'unknown') assert.notEqual(dependency.status, 'covered', `${dependency.id} has unknown semantics and cannot be fully covered.`);
   if (['not-covered', 'blocked-unknown-semantics'].includes(dependency.status)) assert.equal(dependency.fixtureExpectationIds.length, 0, `${dependency.id} claims no coverage but links expectations.`);
