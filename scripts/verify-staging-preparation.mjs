@@ -10,7 +10,10 @@ for (const marker of [
   '20260821120417',
   '20260916184458',
   'zero recorded migrations',
-  'two-person schema review',
+  'solo-maintainer review',
+  'Pass A',
+  'Pass B',
+  'automated structural validation',
   'SECURITY DEFINER',
   'synthetic',
   '/api/ai-fridge'

@@ -91,11 +91,12 @@ runtime verification before its server behavior can be called ready.
 
 ## Exact next gate
 
-The next gate before any real staging rebuild work can continue is the existing **mandatory
-two-person schema review**: two authorized humans must review the encrypted material outside Git,
-reconcile it with the structural catalog, and approve a sanitized, secret-free baseline with
-explicit disposition of private tables, grants/RLS, Storage policies, Realtime configuration, and
-every `SECURITY DEFINER` overload. This document neither accesses nor approves that evidence.
+The next gate is the **solo-maintainer review** defined in the recovery runbook. The sole
+maintainer must complete independent Pass A and Pass B against matching encrypted-source and
+sanitized-candidate hashes after automated structural validation passes. The private record must
+explicitly disposition private tables, grants/RLS, Storage policies, Realtime/publication
+configuration, production-specific URLs/constants, and every `SECURITY DEFINER` overload. This
+document neither accesses nor approves that evidence, and it does not imply a second reviewer.
 
 After that gate, a separate reviewed PR may introduce the baseline. Restoring or authoritatively
 reimplementing the three missing API handlers and authorizing staging execution remain later,
