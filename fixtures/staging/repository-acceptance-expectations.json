@@ -1,0 +1,37 @@
+{
+  "fixtureSet": "repository-only-client-acceptance-v1",
+  "syntheticOnly": true,
+  "basis": "tracked-client-and-repository-behavior-only",
+  "environment": "offline",
+  "productionVerified": false,
+  "prohibitedClaims": ["server-authorization", "anonymous-permission", "authenticated-permission", "server-token-revocation"],
+  "recipes": [
+    {
+      "id": "repo-recipe-soup",
+      "recipe_ingredients": [
+        { "id": "repo-ingredient-carrot", "recipeRef": "repo-recipe-soup", "position": 2, "raw": "fictional carrot" },
+        { "id": "repo-ingredient-lentils", "recipeRef": "repo-recipe-soup", "position": 1, "raw": "fictional lentils" }
+      ],
+      "recipe_steps": [
+        { "id": "repo-step-simmer", "recipeRef": "repo-recipe-soup", "position": 2, "instruction": "Simmer the fictional soup." },
+        { "id": "repo-step-rinse", "recipeRef": "repo-recipe-soup", "position": 1, "instruction": "Rinse the fictional lentils." }
+      ]
+    }
+  ],
+  "categories": [
+    { "id": "repo-category-dinner", "name": "Fictional Dinner", "display_order": 2 },
+    { "id": "repo-category-breakfast", "name": "Fictional Breakfast", "display_order": 1 }
+  ],
+  "subcategories": [
+    { "id": "repo-subcategory-stew", "categoryRef": "repo-category-dinner", "name": "Fictional Stew", "display_order": 2 },
+    { "id": "repo-subcategory-soup", "categoryRef": "repo-category-dinner", "name": "Fictional Soup", "display_order": 1 },
+    { "id": "repo-subcategory-toast", "categoryRef": "repo-category-breakfast", "name": "Fictional Toast", "display_order": 1 }
+  ],
+  "expectations": [
+    { "id": "repo-detail-ingredients-embedded-position-order", "dependency": "postgrest:recipe_ingredients", "behavior": "embedded-read", "recipeRef": "repo-recipe-soup", "relationship": "recipe_ingredients", "orderBy": "position", "direction": "asc", "expectedRefs": ["repo-ingredient-lentils", "repo-ingredient-carrot"] },
+    { "id": "repo-detail-steps-embedded-position-order", "dependency": "postgrest:recipe_steps", "behavior": "embedded-read", "recipeRef": "repo-recipe-soup", "relationship": "recipe_steps", "orderBy": "position", "direction": "asc", "expectedRefs": ["repo-step-rinse", "repo-step-simmer"] },
+    { "id": "repo-taxonomy-categories-display-order", "dependency": "postgrest:recipe_categories", "behavior": "taxonomy-read", "orderBy": "display_order", "direction": "asc", "expectedRefs": ["repo-category-breakfast", "repo-category-dinner"] },
+    { "id": "repo-taxonomy-subcategories-reference-and-order", "dependency": "postgrest:recipe_subcategories", "behavior": "taxonomy-read", "parentRefField": "categoryRef", "orderBy": "display_order", "direction": "asc", "expectedRefsByCategory": { "repo-category-breakfast": ["repo-subcategory-toast"], "repo-category-dinner": ["repo-subcategory-soup", "repo-subcategory-stew"] } },
+    { "id": "repo-auth-local-logout-effects", "dependency": "auth:local-logout", "behavior": "client-local-logout", "removesSessionFromMemory": true, "removedStorageKeys": ["pot_session_v4", "pot_session_v3"], "closesRealtimeConnection": true, "clearsRealtimeHandle": true, "clearsRealtimeHeartbeat": true, "serverTokenRevocation": "not-claimed" }
+  ]
+}
