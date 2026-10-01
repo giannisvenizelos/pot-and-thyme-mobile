@@ -277,9 +277,11 @@
       "name": "public.recipe_ingredients",
       "evidence": "BACKEND_INVENTORY.md",
       "semantics": "documented",
-      "status": "not-covered",
-      "fixtureExpectationIds": [],
-      "note": "No synthetic acceptance expectation directly exercises this dependency."
+      "status": "covered",
+      "fixtureExpectationIds": ["repo-detail-ingredients-embedded-position-order"],
+      "note": "Repository-only expectation covers the tracked embedded detail read and client-side position ordering; standalone authorization is not asserted.",
+      "coverageProvenance": "tracked-client-derived-expectation",
+      "productionVerified": false
     },
     {
       "id": "postgrest:recipe_steps",
@@ -287,9 +289,11 @@
       "name": "public.recipe_steps",
       "evidence": "BACKEND_INVENTORY.md",
       "semantics": "documented",
-      "status": "not-covered",
-      "fixtureExpectationIds": [],
-      "note": "No synthetic acceptance expectation directly exercises this dependency."
+      "status": "covered",
+      "fixtureExpectationIds": ["repo-detail-steps-embedded-position-order"],
+      "note": "Repository-only expectation covers the tracked embedded detail read and client-side position ordering; standalone authorization is not asserted.",
+      "coverageProvenance": "tracked-client-derived-expectation",
+      "productionVerified": false
     },
     {
       "id": "postgrest:recipe_categories",
@@ -297,9 +301,11 @@
       "name": "public.recipe_categories",
       "evidence": "BACKEND_INVENTORY.md",
       "semantics": "documented",
-      "status": "not-covered",
-      "fixtureExpectationIds": [],
-      "note": "No synthetic acceptance expectation directly exercises this dependency."
+      "status": "covered",
+      "fixtureExpectationIds": ["repo-taxonomy-categories-display-order"],
+      "note": "Repository-only expectation covers the tracked taxonomy read and display_order ordering without asserting actor permissions.",
+      "coverageProvenance": "tracked-client-derived-expectation",
+      "productionVerified": false
     },
     {
       "id": "postgrest:recipe_subcategories",
@@ -307,9 +313,11 @@
       "name": "public.recipe_subcategories",
       "evidence": "BACKEND_INVENTORY.md",
       "semantics": "documented",
-      "status": "not-covered",
-      "fixtureExpectationIds": [],
-      "note": "No synthetic acceptance expectation directly exercises this dependency."
+      "status": "covered",
+      "fixtureExpectationIds": ["repo-taxonomy-subcategories-reference-and-order"],
+      "note": "Repository-only expectation covers the tracked taxonomy read, category reference consistency, and display_order ordering without asserting actor permissions.",
+      "coverageProvenance": "tracked-client-derived-expectation",
+      "productionVerified": false
     },
     {
       "id": "postgrest:meal_plan",
@@ -468,9 +476,11 @@
       "name": "Logout",
       "evidence": "BACKEND_INVENTORY.md",
       "semantics": "documented",
-      "status": "not-covered",
-      "fixtureExpectationIds": [],
-      "note": "No expectation covers local session removal and Realtime shutdown."
+      "status": "covered",
+      "fixtureExpectationIds": ["repo-auth-local-logout-effects"],
+      "note": "Repository-only expectation covers local session and current/legacy key cleanup plus tracked Realtime shutdown; server-side token revocation is not asserted.",
+      "coverageProvenance": "tracked-client-derived-expectation",
+      "productionVerified": false
     }
   ]
 }

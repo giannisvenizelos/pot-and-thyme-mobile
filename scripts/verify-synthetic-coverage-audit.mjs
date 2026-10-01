@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 const audit = JSON.parse(await readFile('fixtures/staging/synthetic-coverage-audit.json', 'utf8'));
 const fixture = JSON.parse(await readFile(audit.fixture, 'utf8'));
 const recipeManagementFixture = JSON.parse(await readFile('fixtures/staging/recipe-management-expectations.json', 'utf8'));
+const repositoryFixture = JSON.parse(await readFile('fixtures/staging/repository-acceptance-expectations.json', 'utf8'));
 const requiredDependencyIds = [
   'rpc:get_app_bootstrap', 'rpc:create_household', 'rpc:join_household', 'rpc:remove_meal_plan_item',
   'rpc:create_community_recipe', 'rpc:moderate_community_recipe', 'rpc:edit_pending_community_recipe',
@@ -20,8 +21,77 @@ const requiredDependencyIds = [
 const statuses = new Set(['covered', 'partial', 'not-covered', 'blocked-unknown-semantics']);
 const fixtureCases = new Set([
   ...fixture.cases.map(testCase => testCase.id),
-  ...recipeManagementFixture.expectations.map(expectation => expectation.id)
+  ...recipeManagementFixture.expectations.map(expectation => expectation.id),
+  ...repositoryFixture.expectations.map(expectation => expectation.id)
 ]);
+
+const repositoryDependencyIds = new Set([
+  'postgrest:recipe_ingredients', 'postgrest:recipe_steps', 'postgrest:recipe_categories',
+  'postgrest:recipe_subcategories', 'auth:local-logout'
+]);
+assert.equal(repositoryFixture.syntheticOnly, true);
+assert.equal(repositoryFixture.environment, 'offline');
+assert.equal(repositoryFixture.productionVerified, false);
+assert.deepEqual(repositoryFixture.prohibitedClaims.sort(), [
+  'anonymous-permission', 'authenticated-permission', 'server-authorization', 'server-token-revocation'
+]);
+
+const repositoryExpectations = new Map(repositoryFixture.expectations.map(expectation => [expectation.id, expectation]));
+assert.equal(repositoryExpectations.size, repositoryFixture.expectations.length, 'Repository expectation ids must be unique.');
+const recipeIds = new Set(repositoryFixture.recipes.map(recipe => recipe.id));
+const categories = new Map(repositoryFixture.categories.map(category => [category.id, category]));
+const subcategories = new Map(repositoryFixture.subcategories.map(subcategory => [subcategory.id, subcategory]));
+const forbiddenClaimFields = new Set(['actorRef', 'expect', 'authorization', 'permission', 'tokenRevoked', 'revokesToken']);
+
+for (const expectation of repositoryFixture.expectations) {
+  assert(repositoryDependencyIds.has(expectation.dependency), `${expectation.id} covers an out-of-scope dependency.`);
+  for (const field of Object.keys(expectation)) {
+    assert(!forbiddenClaimFields.has(field), `${expectation.id} accidentally claims server authorization or revocation via ${field}.`);
+  }
+}
+assert.deepEqual(new Set(repositoryFixture.expectations.map(item => item.dependency)), repositoryDependencyIds, 'Repository expectations must cover every scoped dependency exactly by dependency.');
+
+for (const relationship of ['recipe_ingredients', 'recipe_steps']) {
+  const expectation = repositoryFixture.expectations.find(item => item.relationship === relationship);
+  assert(expectation, `${relationship} lacks embedded relationship coverage.`);
+  assert.equal(expectation.behavior, 'embedded-read');
+  assert.equal(expectation.orderBy, 'position', `${relationship} must cover position ordering.`);
+  assert.equal(expectation.direction, 'asc');
+  assert(recipeIds.has(expectation.recipeRef), `${expectation.id} has a broken recipe reference.`);
+  const recipe = repositoryFixture.recipes.find(item => item.id === expectation.recipeRef);
+  const rows = recipe[relationship];
+  assert(rows.length > 1, `${expectation.id} needs enough rows to prove ordering.`);
+  assert(rows.every(row => row.recipeRef === recipe.id), `${expectation.id} has a broken embedded recipe relationship.`);
+  assert.deepEqual([...rows].sort((a, b) => a.position - b.position).map(row => row.id), expectation.expectedRefs, `${expectation.id} has stale ordering expectations.`);
+}
+
+const categoryExpectation = repositoryExpectations.get('repo-taxonomy-categories-display-order');
+assert.equal(categoryExpectation.orderBy, 'display_order', 'Category coverage must require display_order.');
+assert.deepEqual([...categories.values()].sort((a, b) => a.display_order - b.display_order).map(row => row.id), categoryExpectation.expectedRefs);
+const subcategoryExpectation = repositoryExpectations.get('repo-taxonomy-subcategories-reference-and-order');
+assert.equal(subcategoryExpectation.parentRefField, 'categoryRef', 'Subcategory coverage must require its category relationship.');
+assert.equal(subcategoryExpectation.orderBy, 'display_order', 'Subcategory coverage must require display_order.');
+for (const row of subcategories.values()) assert(categories.has(row.categoryRef), `${row.id} has a broken category reference.`);
+for (const [categoryRef, expectedRefs] of Object.entries(subcategoryExpectation.expectedRefsByCategory)) {
+  assert(categories.has(categoryRef), `${subcategoryExpectation.id} references a missing category.`);
+  assert.deepEqual([...subcategories.values()].filter(row => row.categoryRef === categoryRef).sort((a, b) => a.display_order - b.display_order).map(row => row.id), expectedRefs);
+}
+
+const logout = repositoryExpectations.get('repo-auth-local-logout-effects');
+assert.equal(logout.removesSessionFromMemory, true);
+assert.deepEqual(logout.removedStorageKeys, ['pot_session_v4', 'pot_session_v3']);
+assert.equal(logout.closesRealtimeConnection, true);
+assert.equal(logout.clearsRealtimeHandle, true);
+assert.equal(logout.clearsRealtimeHeartbeat, true);
+assert.equal(logout.serverTokenRevocation, 'not-claimed');
+const clientSessionSource = await readFile('shared/app1.js', 'utf8');
+const clientRealtimeSource = await readFile('shared/app2.js', 'utf8');
+const clientLogoutSource = await readFile('apps/mobile/mobile.js', 'utf8');
+for (const key of logout.removedStorageKeys) assert(clientSessionSource.includes(`localStorage.removeItem('${key}')`), `Logout key ${key} is not supported by tracked client code.`);
+assert(clientSessionSource.includes('S.session=x'), 'Tracked client no longer clears its in-memory session through saveSession.');
+assert(clientLogoutSource.includes('disconnectRealtime(); saveSession(null)'), 'Tracked logout no longer performs Realtime shutdown before local session cleanup.');
+assert(clientRealtimeSource.includes('S.rt.close()') && clientRealtimeSource.includes('S.rt=null'), 'Tracked Realtime shutdown no longer closes and clears the connection.');
+assert(clientRealtimeSource.includes('clearInterval(S.rtHeartbeat)') && clientRealtimeSource.includes('S.rtHeartbeat=null'), 'Tracked Realtime shutdown no longer clears its heartbeat.');
 
 assert.equal(audit.basis, 'tracked-repository-evidence-only');
 assert.equal(audit.scope, 'test-plan-coverage');
@@ -48,6 +118,14 @@ for (const dependency of audit.dependencies) {
     assert.equal(dependency.productionVerified, false, `${dependency.id} must not claim production verification.`);
     for (const caseId of dependency.fixtureExpectationIds) {
       assert(recipeManagementFixture.expectations.some(item => item.id === caseId && item.rpc === dependency.name), `${dependency.id} links an expectation from the wrong RPC.`);
+    }
+  }
+  if (repositoryDependencyIds.has(dependency.id)) {
+    assert.equal(dependency.status, 'covered', `${dependency.id} must link its repository-only expectation.`);
+    assert.equal(dependency.coverageProvenance, 'tracked-client-derived-expectation', `${dependency.id} lacks client-derived provenance.`);
+    assert.equal(dependency.productionVerified, false, `${dependency.id} must not claim production verification.`);
+    for (const caseId of dependency.fixtureExpectationIds) {
+      assert.equal(repositoryExpectations.get(caseId)?.dependency, dependency.id, `${dependency.id} links an expectation for a different dependency.`);
     }
   }
   if (dependency.semantics === 'unknown') assert.notEqual(dependency.status, 'covered', `${dependency.id} has unknown semantics and cannot be fully covered.`);
