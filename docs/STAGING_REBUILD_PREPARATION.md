@@ -56,8 +56,10 @@ as documented in `fixtures/staging/README.md`, until the reviewed schema is appr
 The project currently has one maintainer; no second reviewer or approval may be claimed. The
 authorized maintainer may instead perform **two independent, sequential passes**, recording each
 pass separately in the private encrypted evidence store. Before either pass can approve anything,
-the sanitized candidate must pass the automated structural validation described in
-`SUPABASE_SCHEMA_RECOVERY.md`. A failed or missing validation, Pass A, or Pass B is fail-closed.
+the sanitized candidate must pass the currently implemented **static offline structural
+validation** described in `SUPABASE_SCHEMA_RECOVERY.md`. That validation inspects artifacts without
+applying the candidate to a database and does not produce a database-derived schema fingerprint.
+A failed or missing static validation, Pass A, or Pass B is fail-closed.
 
 5. **Pass A — source and structural inventory.** Record the encrypted source SHA-256, candidate
    SHA-256, validation-result hash, timestamp, maintainer identity, and tool versions. Review
@@ -71,18 +73,23 @@ the sanitized candidate must pass the automated structural validation described 
    Pass A notes alone). Record the same provenance fields, then inspect function bodies,
    ownership/grants, fixed safe `search_path`, Storage policies/dependencies,
    Realtime/publication configuration, and secrets/personal-data scan results. Compare every
-   finding and disposition with Pass A, resolve differences, and re-run structural validation if
+   finding and disposition with Pass A, resolve differences, and re-run static validation if
    the candidate changes (which invalidates both approvals until the new hash is reviewed).
 8. Delete all decrypted Pass B working files and caches and record cleanup as for Pass A. Only
-   after both passes explicitly approve the identical candidate hash and passing validation may a
+   after both passes explicitly approve the identical candidate hash and passing static validation may a
    separate PR create a deterministic, secret-free **candidate sanitized baseline**. This solo
-   review does not authorize staging or production changes. The PR must resolve discrepancies,
-   not fill gaps from client calls or `scripts/recipe-management.sql`.
+   review does not make the candidate migration-ready and does not authorize staging inspection,
+   application, or production changes. The PR must resolve discrepancies, not fill gaps from
+   client calls or `scripts/recipe-management.sql`.
 
 ### Later execution (separately authorized)
 
-9. Apply the candidate baseline twice to fresh local databases and compare fingerprints. Then
-   independently confirm the empty staging ref and run the guarded history/dry-run inspection.
+9. First implement the currently missing offline fresh-database validation. It must apply the
+   candidate baseline to fresh local databases, derive deterministic schema fingerprints, and
+   prove that repeated applies produce the expected identical fingerprint. Record a separate
+   passing attestation for the exact candidate hash. Only after that implementation exists and
+   passes may a separately authorized operator confirm the empty staging ref and run the guarded
+   history/dry-run inspection.
 10. Apply only to isolated staging under a separate explicit authorization; configure staging-only Auth,
    Storage, Realtime, API handlers, URLs, and integration credentials before synthetic seeding.
 11. Seed deterministic synthetic fixtures, execute the acceptance matrix, repeat from a clean
@@ -94,7 +101,11 @@ the sanitized candidate must pass the automated structural validation described 
 ### Schema and provenance blockers
 
 - [ ] The named maintainer completed Pass A and Pass B independently against the same recorded
-  encrypted-source and sanitized-candidate SHA-256 hashes, with passing structural validation.
+  encrypted-source and sanitized-candidate SHA-256 hashes, with passing static structural
+  validation. This review result alone is not migration readiness.
+- [ ] The separate fresh-database candidate apply and deterministic schema fingerprint validator
+  has been implemented and passed for that exact candidate hash; its explicit attestation is
+  required before any staging history inspection or migration dry-run/application.
 - [ ] The private review record explicitly dispositions every private table, every
   `SECURITY DEFINER` function/overload, grants/RLS, every Storage policy, Realtime/publication
   configuration, and every production-specific URL/constant.
@@ -142,7 +153,9 @@ the sanitized candidate must pass the automated structural validation described 
 ## Current disposition
 
 Repository-only inventory, guardrails, fixture rules, and the future test matrix can be prepared
-now. Baseline creation, any remote dry-run/application, seeding, and API/RLS acceptance testing
-remain **blocked** until both solo-maintainer passes authorize a candidate sanitized schema source
-and a separate explicit change authorizes staging execution. Solo review never authorizes a
-production mutation; production mutation remains prohibited.
+now. Fresh-database apply/fingerprint validation is not implemented. Baseline creation, any remote
+history inspection, dry-run/application, seeding, and API/RLS acceptance testing remain
+**blocked** until both solo-maintainer passes authorize a candidate sanitized schema source, the
+separate fresh-database validator is implemented and passes, and a separate explicit change
+authorizes staging execution. Solo review never authorizes a production mutation; production
+mutation remains prohibited.
