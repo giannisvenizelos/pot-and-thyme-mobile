@@ -5,7 +5,7 @@ SET row_security = off;
 -- Every result is a single canonical jsonb value. psql's unaligned output is
 -- sorted once more by the caller before hashing, so catalog scan order is irrelevant.
 WITH app_ns AS (
-  SELECT oid, nspname FROM pg_namespace
+  SELECT oid, nspname, nspacl FROM pg_namespace
   WHERE nspname !~ '^pg_' AND nspname <> 'information_schema'
     AND nspname NOT IN ('auth','extensions','graphql','graphql_public','net','pgbouncer','realtime','storage','supabase_functions','supabase_migrations','vault')
 ), objects AS (
