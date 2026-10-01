@@ -139,14 +139,12 @@ validation-output hashes; export/project identity; tool versions; maintainer ide
 Pass A/Pass B timestamps, findings, dispositions, approvals, and cleanup confirmations. Hash the
 candidate again at the start and end of each pass. A mismatch invalidates the pass.
 
-Before either pass can approve, run automated structural validation in an offline, disposable
-local database: verify the manifest hashes; parse/apply the sanitized candidate to a fresh
-database; dump it schema-only; compare normalized object inventories and expected counts with the
-catalog export; and fail on parse/apply errors, missing or unexpected schemas/types/relations,
-constraints/indexes/triggers/routines/overloads, RLS flags/policies, grants, publications, or
-Storage dependencies. Save and hash the commands, tool versions, results, and schema fingerprint
-in the private store. No network target is permitted. Validation passing is necessary, not an
-approval, and any candidate edit requires validation and both passes again.
+Before either pass can approve, run the private repository's currently implemented **static
+offline structural validation**. It verifies and inspects the candidate artifacts without
+applying them to a database. Save and hash its commands, tool versions, and results in the private
+store. A static-validation pass is necessary for Pass A and Pass B, but it is not a fresh-database
+apply, does not produce a database-derived deterministic schema fingerprint, and does not make the
+candidate migration-ready. Any candidate edit requires static validation and both passes again.
 
 1. **Pass A — provenance and structure:** review provenance, structural consistency, complete
    object inventory, each private table, grants/RLS, every `SECURITY DEFINER` routine and overload,
@@ -161,13 +159,17 @@ approval, and any candidate edit requires validation and both passes again.
    for secrets and personal data. Compare the candidate and every disposition against Pass A;
    resolve all differences rather than silently accepting them.
 4. Repeat cleanup after Pass B. Both pass approvals must name the identical candidate hash and a
-   passing validation hash. Only then may the maintainer create a candidate sanitized baseline in
-   a separate PR, preserving exact safe definitions while removing environment ownership and
-   secrets. Do not copy the historical recipe script or invent objects to satisfy the client.
+   passing static-validation hash. Only then may the maintainer create a candidate sanitized
+   baseline in a separate PR, preserving exact safe definitions while removing environment
+   ownership and secrets. Do not copy the historical recipe script or invent objects to satisfy
+   the client.
 
-This review authorizes only creation of that candidate baseline. It does not authorize a staging
-connection or application. Fresh-database local validation must succeed before staging, and
-staging application requires a separate explicit authorization. Production mutation is prohibited.
+This review authorizes only creation of that candidate baseline. It does not make the baseline
+migration-ready or authorize a staging connection, history inspection, dry-run, or application.
+Fresh-database candidate apply plus deterministic schema fingerprint validation is not currently
+implemented; it must be implemented separately and pass for the exact candidate hash before any
+staging migration operation. Staging application then requires separate explicit authorization.
+Production mutation is prohibited.
 
 ## 5. Isolated staging rebuild with synthetic data
 
@@ -179,8 +181,10 @@ staging application requires a separate explicit authorization. Production mutat
    staging project ref twice. `scripts/verify-staging-migrations.sh` rejects the production ref,
    rejects every ref other than the named staging project, confirms the CLI's linked-ref file,
    and requires a deliberate confirmation variable. It stops before any CLI call while the
-   baseline is absent. When a reviewed baseline exists, it runs only migration-history listing
-   and `db push --dry-run`; it never applies migrations.
+   baseline is absent or fresh-database validation is not explicitly attested. A reviewed baseline
+   and Pass A/Pass B attestation alone cannot unlock remote inspection. Only after the separate
+   validator is implemented and passes does it run migration-history listing and `db push
+   --dry-run`; it never applies migrations.
 3. Apply the reviewed baseline to a clean local database first, then to the isolated staging
    project. Capture command versions, logs, schema fingerprint, and migration table state.
 4. Generate deterministic fictional UUIDs, `example.invalid` emails, households, recipes,
@@ -219,8 +223,10 @@ PR 2C can be called **complete schema recovery** only when all boxes below have 
   separately and handed to PR 2D; Dashboard-only settings are enumerated.
 - [ ] A reviewed, secret-free, deterministic baseline exists under `supabase/migrations/` and
   has the approved export fingerprint/provenance; no guessed object exists.
-- [ ] Automated offline structural validation passes before both review approvals, followed by two
-  fresh local rebuilds with identical fingerprints; isolated staging awaits separate authorization.
+- [ ] Static offline structural validation passes before both review approvals. Separately, the
+  fresh-database apply and deterministic fingerprint validator is implemented and passes twice
+  with identical fingerprints for the attested candidate hash; isolated staging awaits separate
+  authorization.
 - [ ] Synthetic-only tests cover PR 2B API contracts and database/RPC relationship integrity;
   no production PII, credentials, object paths, or remote production writes occur.
 - [ ] Restore logs, deviations, owners, and follow-up security findings are retained in the
