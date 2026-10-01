@@ -96,8 +96,9 @@ assertion without catalog output, or copying these definitions into a migration 
    tickets, shell history, or command output. Run on an encrypted workstation with PostgreSQL
    client tools compatible with the server and record their versions.
 3. Create an encrypted evidence directory outside the repository; set `EXPORT_DIR` to a
-   temporary location inside it. Confirm the hostname/project ref out-of-band with a second
-   reviewer. The script also requires the ref in the URI and forces read-only transactions.
+   temporary location inside it. The sole maintainer must confirm the hostname/project ref twice,
+   using the approved project record and then the URI independently. The script also requires the
+   ref in the URI and forces read-only transactions.
 
 ### Collection
 
@@ -125,14 +126,48 @@ Storage limits; Realtime limits/authorization; backup/PITR status; migration his
 Function names/versions. Export configuration screenshots/JSON to encrypted evidence, redact
 tenant/user identifiers, and hash the artifacts. Do not commit them by default.
 
-### Review and baseline conversion
+### Review and baseline conversion: solo-maintainer review
 
-Two reviewers compare the raw SQL, catalog JSONL, Dashboard metadata, repository inventory,
-and migration history. Resolve every discrepancy. From the approved structural export create
-one deterministic `supabase/migrations/YYYYMMDDHHMMSS_production_baseline.sql`; preserve exact
-definitions but remove environment ownership and secrets. Record source hashes and every
-deliberate transformation. Do not copy the historical recipe script into migrations or invent
-household tables/functions to satisfy the client.
+There is one maintainer. The controlled path therefore requires two genuinely independent review
+passes by that maintainer and never represents that a second human participated. Raw decrypted
+schema may exist only in a temporary encrypted-workstation workspace. It must **never** be
+committed, uploaded to GitHub, pasted into chat, or placed in repository artifacts.
+
+In the private encrypted evidence store, create a review record containing: encrypted source
+artifact names and SHA-256 hashes; sanitized candidate name and SHA-256; manifest and automated
+validation-output hashes; export/project identity; tool versions; maintainer identity; separate
+Pass A/Pass B timestamps, findings, dispositions, approvals, and cleanup confirmations. Hash the
+candidate again at the start and end of each pass. A mismatch invalidates the pass.
+
+Before either pass can approve, run automated structural validation in an offline, disposable
+local database: verify the manifest hashes; parse/apply the sanitized candidate to a fresh
+database; dump it schema-only; compare normalized object inventories and expected counts with the
+catalog export; and fail on parse/apply errors, missing or unexpected schemas/types/relations,
+constraints/indexes/triggers/routines/overloads, RLS flags/policies, grants, publications, or
+Storage dependencies. Save and hash the commands, tool versions, results, and schema fingerprint
+in the private store. No network target is permitted. Validation passing is necessary, not an
+approval, and any candidate edit requires validation and both passes again.
+
+1. **Pass A — provenance and structure:** review provenance, structural consistency, complete
+   object inventory, each private table, grants/RLS, every `SECURITY DEFINER` routine and overload,
+   and every production-specific constant/URL. Record an explicit keep/remove/replace/block
+   disposition and rationale for every item in those categories.
+2. Clean the Pass A workspace: securely remove decrypted raw SQL, extracted metadata, editor swap
+   files, shell output, database volumes, and other temporary/cache copies. Record cleanup in the
+   private review record; retain only approved encrypted evidence and hashed review materials.
+3. **Pass B — sanitized candidate:** in a new review session, verify hashes and inspect the
+   candidate itself, including all function bodies, ownership/grants, fixed safe `search_path`,
+   Storage dependencies and every Storage policy, Realtime/publication configuration, and scans
+   for secrets and personal data. Compare the candidate and every disposition against Pass A;
+   resolve all differences rather than silently accepting them.
+4. Repeat cleanup after Pass B. Both pass approvals must name the identical candidate hash and a
+   passing validation hash. Only then may the maintainer create a candidate sanitized baseline in
+   a separate PR, preserving exact safe definitions while removing environment ownership and
+   secrets. Do not copy the historical recipe script or invent objects to satisfy the client.
+
+This review authorizes only creation of that candidate baseline. It does not authorize a staging
+connection or application. Fresh-database local validation must succeed before staging, and
+staging application requires a separate explicit authorization. Production mutation is prohibited.
 
 ## 5. Isolated staging rebuild with synthetic data
 
@@ -176,14 +211,16 @@ project, execute a migration, or create a project.
 PR 2C can be called **complete schema recovery** only when all boxes below have evidence:
 
 - [ ] Authorized, timestamped production schema-only export and catalog/security metadata have
-  matching SHA-256 manifests, tool versions, project identity, and two-person approval.
+  matching SHA-256 manifests, tool versions, project identity, and separately recorded Pass A and
+  Pass B approval by the sole maintainer for the same sanitized-candidate and source hashes.
 - [ ] All schemas/types/tables/relationships/constraints/indexes/triggers/functions/RPCs are
   accounted for; inventory discrepancies and migration-history drift are resolved.
 - [ ] RLS/grants, Storage policies/config, and Realtime publication/replica identity are captured
   separately and handed to PR 2D; Dashboard-only settings are enumerated.
 - [ ] A reviewed, secret-free, deterministic baseline exists under `supabase/migrations/` and
   has the approved export fingerprint/provenance; no guessed object exists.
-- [ ] A fresh local and isolated staging rebuild succeeds twice with identical fingerprints.
+- [ ] Automated offline structural validation passes before both review approvals, followed by two
+  fresh local rebuilds with identical fingerprints; isolated staging awaits separate authorization.
 - [ ] Synthetic-only tests cover PR 2B API contracts and database/RPC relationship integrity;
   no production PII, credentials, object paths, or remote production writes occur.
 - [ ] Restore logs, deviations, owners, and follow-up security findings are retained in the

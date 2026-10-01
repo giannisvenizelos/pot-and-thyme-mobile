@@ -10,6 +10,12 @@ const staging = readFileSync('scripts/verify-staging-migrations.sh', 'utf8');
 
 assert.match(recovery, /blocked at preparation/);
 assert.match(recovery, /Do not copy the historical recipe script/);
+assert.match(recovery, /solo-maintainer review/);
+assert.match(recovery, /Pass A — provenance and structure/);
+assert.match(recovery, /Pass B — sanitized candidate/);
+assert.match(recovery, /Automated offline structural validation passes/);
+assert.match(recovery, /never.*committed, uploaded to GitHub, pasted into chat/is);
+assert.match(recovery, /Production mutation is prohibited/);
 assert.match(exporter, /default_transaction_read_only=on/);
 assert.match(exporter, /--schema-only/);
 assert.match(exporter, /ccvdkbdnykfhenhqkicm/);
@@ -26,6 +32,10 @@ assert.match(privateSecurity, /pg_get_functiondef/);
 assert.match(staging, /vjtvjdhwdwwyjfomxfqs/);
 assert.match(staging, /ccvdkbdnykfhenhqkicm/);
 assert.match(staging, /db push --linked --dry-run/);
+assert.match(staging, /Pass A: approved/);
+assert.match(staging, /Pass B: approved/);
+assert.match(staging, /Automated structural validation: passed/);
+assert.match(staging, /Sanitized candidate SHA-256/);
 assert.doesNotMatch(staging, /db push --linked(?:\s|['"]|$)(?!\s*--dry-run)/);
 assert.ok(existsSync('supabase/migrations/README.md'));
 
