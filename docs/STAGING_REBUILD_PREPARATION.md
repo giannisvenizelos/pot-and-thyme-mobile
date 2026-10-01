@@ -153,9 +153,10 @@ A failed or missing static validation, Pass A, or Pass B is fail-closed.
 ## Current disposition
 
 Repository-only inventory, guardrails, fixture rules, and the future test matrix can be prepared
-now. Fresh-database apply/fingerprint validation is not implemented. Baseline creation, any remote
-history inspection, dry-run/application, seeding, and API/RLS acceptance testing remain
-**blocked** until both solo-maintainer passes authorize a candidate sanitized schema source, the
-separate fresh-database validator is implemented and passes, and a separate explicit change
-authorizes staging execution. Solo review never authorizes a production mutation; production
-mutation remains prohibited.
+now. After static validation and both solo-maintainer passes approve the same candidate hash, a
+separate PR may create the candidate sanitized baseline; its creation does not require the future
+fresh-database validator and does not make the candidate migration-ready. Remote history/dry-run
+inspection remains **blocked** until fresh-database apply and deterministic fingerprint validation
+is implemented and passes for that exact candidate hash, followed by separate staging inspection
+authorization. Staging application requires a later, separate explicit authorization. Solo review
+never authorizes a production mutation; production mutation remains prohibited.
