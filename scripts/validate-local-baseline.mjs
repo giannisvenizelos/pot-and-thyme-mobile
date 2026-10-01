@@ -20,7 +20,8 @@ for (const marker of ['supabase/.temp/project-ref','supabase/.branches/_current_
 }
 
 function run(command, args, options={}) {
-  const result = spawnSync(command, args, { encoding:'utf8', stdio:['ignore','pipe','pipe'], ...options });
+  const stdin=options.input === undefined ? 'ignore' : 'pipe';
+  const result = spawnSync(command, args, { encoding:'utf8', stdio:[stdin,'pipe','pipe'], ...options });
   if (result.error) throw new Error(`Unable to execute required local tool ${command}: ${result.error.message}`);
   if (result.status !== 0) throw new Error(`${command} ${args.join(' ')} failed:\n${result.stdout ?? ''}${result.stderr ?? ''}`);
   return result.stdout;
@@ -34,6 +35,7 @@ function localUrl(status) {
 }
 
 const sql = await readFile(join(root,'scripts/sql/local-schema-fingerprint.sql'),'utf8');
+const syntheticFixture=join(root,'test/fixtures/synthetic-baseline.sql');
 const fingerprints=[];
 for (let pass=1; pass<=2; pass++) {
   const dir=await mkdtemp(join(tmpdir(),`baseline-local-pass-${pass}-`));
@@ -45,7 +47,16 @@ for (let pass=1; pass<=2; pass++) {
     run('supabase',['db','reset','--local','--workdir',dir],{cwd:dir});
     const url=localUrl(run('supabase',['status','-o','env','--workdir',dir],{cwd:dir}));
     const output=run('psql',[url,'-X','-qAt','-v','ON_ERROR_STOP=1'],{cwd:dir,input:sql});
-    const canonical=output.split('\n').filter(Boolean).sort().join('\n')+'\n';
+    const rows=output.split('\n').filter(line => line.trim());
+    assert(rows.length > 0,'Fingerprint query returned no catalog rows; refusing to hash empty output.');
+    if (source === syntheticFixture) {
+      const objects=rows.map(row => JSON.parse(row));
+      assert(objects.some(object => object.kind === 'schema' && object.schema === 'app_test'),
+        'Synthetic fingerprint is missing schema app_test.');
+      assert(objects.some(object => object.kind === 'relation' && object.schema === 'app_test' && object.name === 'notes'),
+        'Synthetic fingerprint is missing relation app_test.notes.');
+    }
+    const canonical=rows.sort().join('\n')+'\n';
     const hash=createHash('sha256').update(canonical).digest('hex');
     fingerprints.push(hash);
     await writeFile(join(root,`.local-baseline-fingerprint-pass-${pass}.sha256`),`${hash}\n`);
