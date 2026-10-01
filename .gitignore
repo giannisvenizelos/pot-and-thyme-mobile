@@ -7,3 +7,4 @@ apps/*/public/
 supabase/exports/
 supabase/.branches/
 supabase/.temp/
+/.local-baseline-fingerprint-pass-*.sha256

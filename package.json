@@ -15,6 +15,7 @@
     "test:readiness-gaps": "node scripts/verify-staging-readiness-gaps.mjs",
     "test:integration:staging": "node scripts/test-staging-api.mjs",
     "test:schema-recovery": "bash -n scripts/export-supabase-schema.sh scripts/verify-staging-migrations.sh && node scripts/verify-schema-recovery.mjs && node scripts/verify-staging-preparation.mjs",
+    "test:baseline-validator": "node scripts/test-local-baseline-validator.mjs",
     "verify:migrations:staging": "bash scripts/verify-staging-migrations.sh"
   },
   "devDependencies": {
