@@ -263,13 +263,17 @@
       "semantics": "partial",
       "status": "partial",
       "fixtureExpectationIds": [
+        "repo-recipes-catalog-fallback-query",
+        "repo-recipes-detail-fallback-query",
         "syn-case-private-recipe-member-read",
         "syn-case-public-recipe-outsider-read",
         "syn-case-public-recipe-anonymous-read",
         "syn-case-private-recipe-outsider-read",
         "syn-case-private-recipe-anonymous-read"
       ],
-      "note": "Read visibility is planned; direct fallback query shapes and mutations are not."
+      "note": "Repository-only expectations cover tracked catalog/detail fallback query shapes, filters, pagination, ordering, and embedded detail behavior. Visibility and server authorization remain test-plan-only or unknown, so coverage stays partial.",
+      "coverageProvenance": "tracked-client-derived-expectation",
+      "productionVerified": false
     },
     {
       "id": "postgrest:recipe_ingredients",
@@ -327,12 +331,17 @@
       "semantics": "partial",
       "status": "partial",
       "fixtureExpectationIds": [
+        "repo-meal-plan-bootstrap-read",
+        "repo-meal-plan-date-update",
+        "repo-meal-plan-servings-update",
         "syn-case-cross-meal-plan-read",
         "syn-case-table-meal-plan-insert",
         "syn-case-table-meal-plan-update",
         "syn-case-table-meal-plan-delete"
       ],
-      "note": "Cross-household read and direct-write denial are planned; same-household and actual write-path behavior are not."
+      "note": "Repository-only expectations cover the tracked same-household bootstrap read and direct PATCH request shapes. Cross-household denial remains a test-plan expectation; server authorization and runtime behavior are not verified.",
+      "coverageProvenance": "tracked-client-derived-expectation",
+      "productionVerified": false
     },
     {
       "id": "postgrest:shopping_checks",
@@ -342,12 +351,16 @@
       "semantics": "partial",
       "status": "partial",
       "fixtureExpectationIds": [
+        "repo-shopping-checks-bootstrap-read",
+        "repo-shopping-checks-upsert",
         "syn-case-cross-shopping-read",
         "syn-case-table-shopping-insert",
         "syn-case-table-shopping-update",
         "syn-case-table-shopping-delete"
       ],
-      "note": "Cross-household read and direct-write denial are planned; same-household and actual write-path behavior are not."
+      "note": "Repository-only expectations cover the tracked same-household bootstrap read and direct upsert request shape. Cross-household denial remains a test-plan expectation; server authorization and runtime behavior are not verified.",
+      "coverageProvenance": "tracked-client-derived-expectation",
+      "productionVerified": false
     },
     {
       "id": "realtime:meal_plan",
