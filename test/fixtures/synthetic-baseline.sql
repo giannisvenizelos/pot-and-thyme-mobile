@@ -1,0 +1,12 @@
+create schema app_test;
+create table app_test.notes (id bigint generated always as identity primary key, owner_id uuid not null, body text not null);
+create index notes_owner_idx on app_test.notes (owner_id);
+alter table app_test.notes enable row level security;
+create policy notes_owner on app_test.notes for all to authenticated using (owner_id = auth.uid()) with check (owner_id = auth.uid());
+create function app_test.note_length(text) returns integer language sql immutable as $$ select length($1) $$;
+create function app_test.note_length(bytea) returns integer language sql immutable as $$ select length($1) $$;
+create function app_test.touch_note() returns trigger language plpgsql set search_path = '' as $$ begin new.body = trim(new.body); return new; end $$;
+create trigger notes_touch before insert or update on app_test.notes for each row execute function app_test.touch_note();
+grant usage on schema app_test to authenticated;
+grant select, insert, update, delete on app_test.notes to authenticated;
+alter publication supabase_realtime add table app_test.notes;

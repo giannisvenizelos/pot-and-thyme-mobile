@@ -84,12 +84,12 @@ A failed or missing static validation, Pass A, or Pass B is fail-closed.
 
 ### Later execution (separately authorized)
 
-9. First implement the currently missing offline fresh-database validation. It must apply the
-   candidate baseline to fresh local databases, derive deterministic schema fingerprints, and
-   prove that repeated applies produce the expected identical fingerprint. Record a separate
-   passing attestation for the exact candidate hash. Only after that implementation exists and
-   passes may a separately authorized operator confirm the empty staging ref and run the guarded
-   history/dry-run inspection.
+9. The local-only fresh-database validator and its synthetic self-test are now implemented as
+   described in `LOCAL_BASELINE_VALIDATION.md`. It has **not** been run against a reviewed real candidate and no
+   passing attestation exists. Once a real candidate exists, apply that exact candidate to fresh
+   local databases, derive matching fingerprints, and only then record a separate passing
+   attestation for its exact hash. Only after that gate may a separately authorized operator
+   confirm the empty staging ref and run the guarded history/dry-run inspection.
 10. Apply only to isolated staging under a separate explicit authorization; configure staging-only Auth,
    Storage, Realtime, API handlers, URLs, and integration credentials before synthetic seeding.
 11. Seed deterministic synthetic fixtures, execute the acceptance matrix, repeat from a clean
